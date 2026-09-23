@@ -1,0 +1,140 @@
+<aside class="admin-sidebar">
+
+  <div class="admin-sidebar__brand">
+    <span class="admin-sidebar__logo">Moda&nbsp;Store</span>
+    <span class="admin-sidebar__badge">Admin</span>
+  </div>
+
+  <nav class="admin-nav" aria-label="Admin navigation">
+
+
+<!-- Dashboard -->
+<a
+  routerLink="/admin/dashboard"
+  routerLinkActive="admin-nav__link--active"
+  class="admin-nav__link"
+>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+    <rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.5"/>
+    <rect x="13" y="3.5" width="7.5" height="7.5" rx="1.5"/>
+    <rect x="3.5" y="13" width="7.5" height="7.5" rx="1.5"/>
+    <rect x="13" y="13" width="7.5" height="7.5" rx="1.5"/>
+  </svg>
+  Dashboard
+</a>
+
+<p class="admin-nav__group-label">Catalog</p>
+
+<!-- Products -->
+<a
+  routerLink="/admin/products"
+  routerLinkActive="admin-nav__link--active"
+  class="admin-nav__link"
+>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+    <path d="M3.5 8 12 3.5 20.5 8 12 12.5 3.5 8Z"/>
+    <path d="M3.5 8v8L12 20.5 20.5 16V8"/>
+    <path d="M12 12.5V20.5"/>
+  </svg>
+  Products
+</a>
+
+<!-- Categories -->
+<a
+  routerLink="/admin/categories"
+  routerLinkActive="admin-nav__link--active"
+  class="admin-nav__link"
+>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+    <path d="M12 3.5 20.5 8 12 12.5 3.5 8 12 3.5Z"/>
+    <path d="m3.5 12 8.5 4.5 8.5-4.5"/>
+    <path d="m3.5 16 8.5 4.5 8.5-4.5"/>
+  </svg>
+  Categories
+</a>
+
+<p class="admin-nav__group-label">Sales</p>
+
+<!-- Orders -->
+<a
+  routerLink="/admin/orders"
+  routerLinkActive="admin-nav__link--active"
+  class="admin-nav__link"
+>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+    <path d="M6 3.5h12v17l-3-2-3 2-3-2-3 2v-17Z"/>
+    <path d="M9 8h6M9 12h6M9 16h3"/>
+  </svg>
+  Orders
+</a>
+
+<!-- Reviews -->
+<a
+  routerLink="/admin/reviews"
+  routerLinkActive="admin-nav__link--active"
+  class="admin-nav__link"
+>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+    <path d="m12 4 2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 16.4l-4.8 2.5.9-5.4-3.9-3.8 5.4-.8L12 4Z"/>
+  </svg>
+  Reviews
+</a>
+
+<p class="admin-nav__group-label">People</p>
+
+<!-- Users -->
+<a
+  routerLink="/admin/users"
+  routerLinkActive="admin-nav__link--active"
+  class="admin-nav__link"
+>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+    <circle cx="9" cy="8" r="3.2"/>
+    <path d="M3 20c1.3-3.4 3.4-5 6-5s4.7 1.6 6 5"/>
+    <circle cx="17.5" cy="8.5" r="2.4"/>
+    <path d="M15.8 12.2c2 .2 3.5 1.6 4.5 3.9"/>
+  </svg>
+  Users
+</a>
+
+
+  </nav>
+
+  <div class="admin-sidebar__foot">
+
+
+<div class="admin-account">
+
+  <span class="admin-account__avatar">
+    {{ initials }}
+  </span>
+
+  <div>
+    <p class="admin-account__name">
+      {{ admin?.name || 'Admin' }}
+    </p>
+
+    <p class="admin-account__role">
+      Administrator
+    </p>
+  </div>
+
+  <button
+    type="button"
+    class="admin-account__logout"
+    aria-label="Log out"
+    (click)="logout()"
+  >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+      <path d="M9 20H5.5A1.5 1.5 0 0 1 4 18.5v-13A1.5 1.5 0 0 1 5.5 4H9"/>
+      <path d="M16 16l4-4-4-4"/>
+      <path d="M20 12H9"/>
+    </svg>
+  </button>
+
+</div>
+
+
+  </div>
+
+</aside>

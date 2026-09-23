@@ -1,0 +1,32 @@
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 40px;
+}
+
+.pagination button {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-gray);
+  border-radius: var(--radius-pill);
+  background: var(--color-white);
+  cursor: pointer;
+  font-size: 15px;
+  transition: 0.2s ease;
+}
+
+.pagination-number.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.pagination-arrow:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination button:not(:disabled):hover {
+  background: var(--color-beige-tint);
+}

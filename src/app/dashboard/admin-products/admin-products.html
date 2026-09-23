@@ -1,0 +1,202 @@
+<div class="page-head">
+  <div>
+    <p class="eyebrow page-head__eyebrow">Catalog</p>
+    <h1>Products</h1>
+    <p class="page-head__sub">Create, edit and manage everything in the catalog.</p>
+  </div>
+  <div class="page-head__actions">
+    <a routerLink="/admin/products/new" class="btn btn--primary btn--sm">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      New product
+    </a>
+  </div>
+</div>
+
+<section class="panel">
+  <div class="panel__head">
+    <div>
+      <p class="panel__title">All products</p>
+      <p class="panel__sub">{{ docsCount }} product{{ docsCount === 1 ? '' : 's' }} in the catalog</p>
+    </div>
+  </div>
+
+  <div class="filters-bar">
+    <label class="filters-bar__search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input
+        type="search"
+        placeholder="Search products…"
+        aria-label="Search products"
+        [ngModel]="searchTerm"
+        (ngModelChange)="onSearchChange($event)"
+      />
+    </label>
+
+    <select
+      class="field__select"
+      aria-label="Category"
+      [ngModel]="categoryFilter"
+      (ngModelChange)="onCategoryFilterChange($event)"
+    >
+      <option value="">All categories</option>
+      @for (category of categories; track category._id) {
+        <option [value]="category._id">{{ category.name }}</option>
+      }
+    </select>
+
+    <select
+      class="field__select"
+      aria-label="Status"
+      [ngModel]="statusFilter"
+      (ngModelChange)="onStatusFilterChange($event)"
+    >
+      <option value="">All statuses</option>
+      <option value="active">Active</option>
+      <option value="inactive">Inactive</option>
+    </select>
+  </div>
+
+  @if (errorMessage) {
+
+    <p class="panel__body" style="color: var(--color-danger);">{{ errorMessage }}</p>
+
+  } @else if (isLoading) {
+
+    <p class="panel__body">Loading products…</p>
+
+  } @else if (!products.length) {
+
+    <div class="table-empty">No products match these filters.</div>
+
+  } @else {
+
+    <div class="table-wrap">
+      <table class="table table--admin">
+        <thead>
+          <tr>
+            <th class="checkbox-cell">
+              <label class="check">
+                <input type="checkbox" [checked]="allSelected" (change)="toggleSelectAll($any($event.target).checked)" />
+                <span class="check__box"></span>
+              </label>
+            </th>
+            <th>Product</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Status</th>
+            <th>Flags</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (product of products; track product._id) {
+            <tr>
+              <td class="checkbox-cell">
+                <label class="check">
+                  <input type="checkbox" [checked]="isSelected(product._id)" (change)="toggleSelect(product._id, $any($event.target).checked)" />
+                  <span class="check__box"></span>
+                </label>
+              </td>
+              <td>
+                <div class="cell-entity">
+                  <span class="cell-entity__thumb">
+                    @if (product.images.length) {
+                      <img [src]="product.images[0].secure_url" [alt]="product.name" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" />
+                    } @else {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+                    }
+                  </span>
+                  <div>
+                    <p class="cell-entity__name">{{ product.name }}</p>
+                    <p class="cell-entity__sub">{{ product.slug }}</p>
+                  </div>
+                </div>
+              </td>
+              <td class="cell-muted">{{ product.category.name || '—' }}</td>
+              <td class="cell-strong">EGP {{ product.price | number:'1.0-0' }}</td>
+              <td>
+                <span class="stock-pill" [class.stock-pill--low]="product.stock > 0 && product.stock <= 10" [class.stock-pill--out]="product.isOutOfStock">
+                  {{ stockLabel(product) }}
+                </span>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="toggle-pill"
+                  [class.toggle-pill--on]="product.isActive"
+                  [disabled]="isToggling(product._id)"
+                  (click)="toggleStatus(product)"
+                >
+                  {{ product.isActive ? 'Active' : 'Inactive' }}
+                </button>
+              </td>
+              <td class="cell-muted">{{ productFlagsLabel(product) }}</td>
+              <td>
+                <div class="row-actions">
+                  <a [routerLink]="['/admin/products/new']" [queryParams]="{ productId: product._id }" class="row-actions__btn" aria-label="Edit">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14.5 4.5 19.5 9.5 8 21H3v-5L14.5 4.5Z"/></svg>
+                  </a>
+                  <button type="button" class="row-actions__btn row-actions__btn--danger" aria-label="Delete" (click)="confirmDelete(product)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-8 0 1 12.5A1.5 1.5 0 0 0 9.5 21h5a1.5 1.5 0 0 0 1.5-1.5L17 7"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel__foot">
+      <p class="panel__foot-note">Showing {{ rangeStart }}–{{ rangeEnd }} of {{ docsCount }} products</p>
+
+      @if (pages > 1) {
+        <nav class="pagination" aria-label="Pagination">
+          <a
+            class="pagination__item pagination__item--nav"
+            [class.pagination__item--disabled]="page === 1"
+            (click)="goToPage(page - 1)"
+          >Prev</a>
+
+          @for (p of pageNumbers; track p) {
+            <a
+              class="pagination__item"
+              [class.pagination__item--active]="p === page"
+              (click)="goToPage(p)"
+            >{{ p }}</a>
+          }
+
+          <a
+            class="pagination__item pagination__item--nav"
+            [class.pagination__item--disabled]="page === pages"
+            (click)="goToPage(page + 1)"
+          >Next</a>
+        </nav>
+      }
+    </div>
+
+  }
+</section>
+
+
+@if (productPendingDelete) {
+  <div class="modal" style="display:flex;">
+    <div class="modal__overlay" (click)="cancelDelete()"></div>
+    <div class="modal__panel" role="dialog" aria-modal="true">
+      <div class="modal__head">
+        <p class="modal__title">Delete product?</p>
+        <button type="button" class="modal__close" (click)="cancelDelete()" aria-label="Close">×</button>
+      </div>
+      <div class="modal__body">
+        This will remove <strong>{{ productPendingDelete.name }}</strong> from the catalog. Customers will no longer be able to find or order it.
+      </div>
+      <div class="modal__actions">
+        <button type="button" class="btn btn--ghost" (click)="cancelDelete()">Cancel</button>
+        <button type="button" class="btn btn--danger" [disabled]="isDeleting" (click)="deleteProduct()">
+          {{ isDeleting ? 'Deleting…' : 'Delete product' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

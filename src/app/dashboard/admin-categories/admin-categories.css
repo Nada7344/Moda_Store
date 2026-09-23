@@ -1,0 +1,10 @@
+/* Reset native <button> chrome so it inherits the .toggle-pill look */
+button.toggle-pill {
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+button.toggle-pill:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

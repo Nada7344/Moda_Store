@@ -1,0 +1,21 @@
+<div class="modal" style="display:flex;">
+  <div class="modal__overlay" (click)="onCancel()"></div>
+  <div class="modal__panel" role="dialog" aria-modal="true">
+    <div class="modal__head">
+      <p class="modal__title">{{ title }}</p>
+      <button type="button" class="modal__close" (click)="onCancel()" aria-label="Close">×</button>
+    </div>
+    <div class="modal__body">
+      {{ message }}
+      @if (errorMessage) {
+        <p style="color: var(--color-danger); font-size: var(--fs-small); margin-top: var(--space-3);">{{ errorMessage }}</p>
+      }
+    </div>
+    <div class="modal__actions">
+      <button type="button" class="btn btn--ghost" [disabled]="isBusy" (click)="onCancel()">{{ cancelLabel }}</button>
+      <button type="button" class="btn btn--danger" [disabled]="isBusy" (click)="onConfirm()">
+        {{ isBusy ? busyLabel : confirmLabel }}
+      </button>
+    </div>
+  </div>
+</div>

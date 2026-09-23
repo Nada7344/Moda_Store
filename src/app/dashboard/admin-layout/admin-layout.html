@@ -1,0 +1,23 @@
+
+<input
+  type="checkbox"
+  id="sidebar-toggle"
+  class="sidebar-toggle"
+  #sidebarToggle
+/>
+
+<div class="admin-shell">
+
+  <app-admin-sidebar [admin]="admin" />
+
+  <div class="admin-main">
+
+    <app-admin-topbar [admin]="admin" />
+
+    <main class="admin-content">
+      <router-outlet />
+    </main>
+
+  </div>
+
+</div>

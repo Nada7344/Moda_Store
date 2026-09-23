@@ -1,0 +1,10 @@
+<app-confirm-dialog
+  title="Delete subcategory?"
+  [message]="'Remove ' + subcategory.name + ' permanently? This cannot be undone.'"
+  confirmLabel="Delete subcategory"
+  busyLabel="Deleting…"
+  [isBusy]="isDeleting"
+  [errorMessage]="errorMessage"
+  (cancelled)="cancel()"
+  (confirmed)="confirm()"
+></app-confirm-dialog>

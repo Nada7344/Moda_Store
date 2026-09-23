@@ -1,0 +1,121 @@
+<div class="auth">
+
+  <!-- ============ BRAND PANEL ============ -->
+  <aside class="auth__brand" aria-hidden="true">
+    <a routerLink="/home" class="auth__logo">Moda&nbsp;Store</a>
+    <div class="auth__blocks">
+      <div class="auth__block auth__block--a"></div>
+      <div class="auth__block auth__block--b"></div>
+      <div class="auth__block auth__block--c"></div>
+    </div>
+    <div class="auth__quote">
+      <p>"Clothes that are worn, not just owned."</p>
+      <cite>— The Moda Store journal</cite>
+    </div>
+  </aside>
+
+  <!-- ============ FORM PANEL ============ -->
+  <div class="auth__form-side">
+    <div class="auth-form">
+
+      <p class="eyebrow auth-form__eyebrow">Welcome back</p>
+      <h1 class="auth-form__title">Log in to your account</h1>
+      <p class="auth-form__sub">New to Moda Store? <a routerLink="/register"><strong>Create an account</strong></a></p>
+
+      @if (errorMessage) {
+        <div class="auth-form__banner auth-form__banner--error">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+          <span>{{ errorMessage }}</span>
+        </div>
+      }
+
+      @if (successMessage) {
+        <div class="auth-form__banner auth-form__banner--success">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M8 12l2.5 2.5L16 9"/></svg>
+          <span>{{ successMessage }}</span>
+        </div>
+      }
+
+      <form
+        class="auth-form__fields"
+        [formGroup]="loginForm"
+        (ngSubmit)="login()"
+      >
+
+        <!-- Email -->
+        <div class="field" [class.field--error]="email?.invalid && email?.touched">
+          <label class="field__label" for="email">Email</label>
+          <input
+            class="field__input"
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="you@example.com"
+            autocomplete="email"
+          >
+
+          @if (email?.invalid && email?.touched) {
+            <p class="field__hint field__hint--error">
+              @if (email?.errors?.['required']) {
+                Email is required.
+              } @else if (email?.errors?.['email']) {
+                Please enter a valid email.
+              }
+            </p>
+          }
+        </div>
+
+        <!-- Password -->
+        <div class="field field--password" [class.field--error]="password?.invalid && password?.touched">
+          <label class="field__label" for="password">Password</label>
+          <input
+            class="field__input"
+            [type]="showPassword ? 'text' : 'password'"
+            id="password"
+            formControlName="password"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+          >
+          <button
+            type="button"
+            class="field__toggle"
+            [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+            (click)="showPassword = !showPassword"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+
+          @if (password?.invalid && password?.touched) {
+            <p class="field__hint field__hint--error">
+              @if (password?.errors?.['required']) {
+                Password is required.
+              }
+            </p>
+          }
+        </div>
+
+        <div class="auth-form__row-inline">
+          <label class="check">
+            <input type="checkbox">
+            <span class="check__box"></span>
+            Remember me
+          </label>
+          <a routerLink="/forgot-password" class="auth-form__forgot">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn btn--primary auth-form__submit" [disabled]="isLoading">
+          @if (isLoading) {
+            Logging in...
+          } @else {
+            Log In
+          }
+        </button>
+
+      </form>
+
+      <p class="auth-form__footer">By continuing you agree to our <a href="/policies">Terms &amp; Policies</a>.</p>
+
+    </div>
+  </div>
+
+</div>

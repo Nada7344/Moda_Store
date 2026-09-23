@@ -1,0 +1,166 @@
+<main>
+
+  <div class="container">
+
+
+    <!--   HEADER -->
+
+    <div class="orders-head">
+
+      <nav
+        class="breadcrumb"
+        aria-label="Breadcrumb"
+      >
+
+        <a routerLink="/">
+          Home
+        </a>
+
+        <span aria-hidden="true">
+          /
+        </span>
+
+        <a routerLink="/profile">
+          Account
+        </a>
+
+        <span aria-hidden="true">
+          /
+        </span>
+
+        <span class="breadcrumb__current">
+          Orders
+        </span>
+
+      </nav>
+
+
+      <h1>
+        My Orders
+      </h1>
+
+    </div>
+
+
+    <!--   ERROR-->
+
+    @if (errorMessage) {
+
+      <div class="orders-message">
+
+        {{ errorMessage }}
+
+      </div>
+
+    }
+
+
+    <!--  LOADING  -->
+
+    @if (isLoading) {
+
+      <div class="orders-loading">
+
+        <p>
+          Loading your orders...
+        </p>
+
+      </div>
+
+    }
+
+
+    <!--  EMPTY -->
+
+    @else if (orders.length === 0) {
+
+      <div class="empty-state">
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.4"
+          aria-hidden="true"
+        >
+
+          <rect
+            x="4"
+            y="7"
+            width="16"
+            height="13"
+            rx="2"
+          />
+
+          <path
+            d="M8 7V5a4 4 0 0 1 8 0v2"
+          />
+
+        </svg>
+
+
+        <h3>
+          No orders yet
+        </h3>
+
+
+        <p>
+          When you place an order,
+          it will show up here.
+        </p>
+
+
+        <a
+          routerLink="/products"
+          class="btn btn--primary"
+        >
+
+          Start Shopping
+
+        </a>
+
+      </div>
+
+    }
+
+
+    <!--   ORDERS  -->
+
+    @else {
+
+      <section
+        class="order-list"
+        aria-label="My orders"
+      >
+
+        @for (
+          order of orders;
+          track order._id
+        ) {
+
+          <app-order-card
+            [order]="order"
+          />
+
+        }
+
+      </section>
+
+
+      <!--   PAGINATION -->
+
+      @if (totalPages > 1) {
+
+        <app-pagination
+          [currentPage]="currentPage"
+          [totalPages]="totalPages"
+          (pageChange)="changePage($event)"
+        />
+
+      }
+
+    }
+
+  </div>
+
+</main>

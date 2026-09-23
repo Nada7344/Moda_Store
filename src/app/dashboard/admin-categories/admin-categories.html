@@ -1,0 +1,112 @@
+<div class="page-head">
+  <div>
+    <p class="eyebrow page-head__eyebrow">Catalog</p>
+    <h1>Categories</h1>
+    <p class="page-head__sub">Organize the catalog into categories and subcategories.</p>
+  </div>
+  <div class="page-head__actions">
+    <button type="button" class="btn btn--primary btn--sm" (click)="openAddModal()">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      New category
+    </button>
+  </div>
+</div>
+
+<section class="panel">
+
+  @if (errorMessage) {
+
+    <p class="panel__body" style="color: var(--color-danger);">{{ errorMessage }}</p>
+
+  } @else if (isLoading) {
+
+    <p class="panel__body">Loading categories…</p>
+
+  } @else if (!categories.length) {
+
+    <div class="table-empty">No categories yet — create the first one to get started.</div>
+
+  } @else {
+
+    <div class="table-wrap">
+      <table class="table table--admin">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Subcategories</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (category of categories; track category._id) {
+            <tr>
+              <td>
+                <p class="cell-entity__name">{{ category.name }}</p>
+                <p class="cell-entity__sub">/{{ category.slug }}</p>
+              </td>
+              <td class="cell-muted">{{ subcategoriesLabel(category) }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="toggle-pill"
+                  [class.toggle-pill--on]="category.isActive"
+                  [disabled]="isBusy(category._id)"
+                  (click)="toggleCategoryStatus(category)"
+                >
+                  {{ category.isActive ? 'Active' : 'Inactive' }}
+                </button>
+              </td>
+              <td>
+                <div class="row-actions">
+                  <button type="button" class="row-actions__btn" aria-label="Manage subcategories" (click)="openSubcategoriesModal(category)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14M5 12h14"/></svg>
+                  </button>
+                  <button type="button" class="row-actions__btn" aria-label="Edit" (click)="openEditModal(category)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14.5 4.5 19.5 9.5 8 21H3v-5L14.5 4.5Z"/></svg>
+                  </button>
+                  <button type="button" class="row-actions__btn row-actions__btn--danger" aria-label="Delete" (click)="openDeleteModal(category)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-8 0 1 12.5A1.5 1.5 0 0 0 9.5 21h5a1.5 1.5 0 0 0 1.5-1.5L17 7"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+  }
+
+</section>
+
+@if (isAddModalOpen) {
+  <app-add-category
+    (closed)="isAddModalOpen = false"
+    (saved)="onCategoryAdded()"
+  ></app-add-category>
+}
+
+@if (categoryBeingEdited) {
+  <app-edit-category
+    [category]="categoryBeingEdited"
+    (closed)="categoryBeingEdited = null"
+    (saved)="onCategoryEdited()"
+  ></app-edit-category>
+}
+
+@if (categoryPendingDelete) {
+  <app-delete-category
+    [category]="categoryPendingDelete"
+    (closed)="categoryPendingDelete = null"
+    (deleted)="onCategoryDeleted()"
+  ></app-delete-category>
+}
+
+@if (categoryForSubcategories) {
+  <app-admin-subcategories
+    [category]="categoryForSubcategories"
+    (closed)="closeSubcategoriesModal()"
+    (changed)="onSubcategoriesChanged($event)"
+  ></app-admin-subcategories>
+}

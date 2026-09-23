@@ -1,0 +1,177 @@
+@if (isLoading) {
+
+  <div class="page-head">
+    <div>
+      <p class="eyebrow page-head__eyebrow">Sales</p>
+      <h1>Order details</h1>
+      <p class="page-head__sub">Loading order…</p>
+    </div>
+  </div>
+
+} @else if (errorMessage || !order) {
+
+  <div class="page-head">
+    <div>
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a routerLink="/admin/orders">Orders</a>
+        <span aria-hidden="true">/</span>
+        <span class="breadcrumb__current">Not found</span>
+      </nav>
+      <h1>Order details</h1>
+      <p class="page-head__sub" style="color: var(--color-danger);">{{ errorMessage || 'Order not found.' }}</p>
+    </div>
+  </div>
+
+} @else {
+
+  <div class="page-head">
+    <div>
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a routerLink="/admin/orders">Orders</a>
+        <span aria-hidden="true">/</span>
+        <span class="breadcrumb__current">{{ orderCode() }}</span>
+      </nav>
+      <h1>Order {{ orderCode() }}</h1>
+      <p class="page-head__sub">Placed on {{ order.createdAt | date:'MMMM d, y' }} by {{ customerName() }}</p>
+    </div>
+
+    @if (canUpdateStatus) {
+      <div class="page-head__actions">
+        <select
+          class="field__select"
+          aria-label="Update status"
+          [(ngModel)]="selectedStatus"
+        >
+          <option [value]="order.status">{{ order.status }}</option>
+          @for (status of allowedNextStatuses; track status) {
+            <option [value]="status">{{ status }}</option>
+          }
+        </select>
+        <button
+          type="button"
+          class="btn btn--primary btn--sm"
+          [disabled]="isUpdating || selectedStatus === order.status"
+          (click)="updateStatus()"
+        >
+          {{ isUpdating ? 'Updating…' : 'Update status' }}
+        </button>
+      </div>
+    }
+  </div>
+
+  @if (updateError) {
+    <p class="panel__body" style="color: var(--color-danger);">{{ updateError }}</p>
+  }
+
+  <div class="content-grid">
+
+    <div style="display:flex; flex-direction:column; gap: var(--space-5);">
+
+      <section class="panel">
+        <div class="panel__head">
+          <div>
+            <p class="panel__title">Items</p>
+            <p class="panel__sub">{{ order.products.length }} product{{ order.products.length === 1 ? '' : 's' }}</p>
+          </div>
+          <app-status-badge [status]="order.status"></app-status-badge>
+        </div>
+        <div class="table-wrap">
+          <table class="table table--admin">
+            <thead>
+              <tr><th>Product</th><th>Price</th><th>Qty</th><th>Subtotal</th></tr>
+            </thead>
+            <tbody>
+              @for (item of order.products; track item.productId?._id) {
+                <tr>
+                  <td>
+                    <div class="cell-entity">
+                      <span class="cell-entity__thumb">
+                        @if (item.productId.images.length) {
+                          <img [src]="item.productId.images[0].secure_url" [alt]="item.productId.name" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" />
+                        } @else {
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+                        }
+                      </span>
+                      <div><p class="cell-entity__name">{{ item.productId.name || 'Deleted product' }}</p></div>
+                    </div>
+                  </td>
+                  <td class="cell-muted">EGP {{ item.price | number:'1.0-0' }}</td>
+                  <td class="cell-muted">{{ item.quantity }}</td>
+                  <td class="cell-strong">EGP {{ item.price * item.quantity | number:'1.0-0' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="panel__foot" style="justify-content: flex-end; gap: var(--space-6);">
+          <div style="text-align:right;">
+            <p class="cell-muted">Shipping</p>
+            <p class="cell-strong">EGP {{ shippingCost() | number:'1.0-0' }}</p>
+          </div>
+          <div style="text-align:right;">
+            <p class="cell-muted">Total</p>
+            <p class="stat-card__value" style="font-size:1.3rem;">EGP {{ order.totalPrice | number:'1.0-0' }}</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel__head">
+          <div>
+            <p class="panel__title">Status history</p>
+          </div>
+        </div>
+        <div class="panel__body">
+          <div class="timeline">
+            @for (step of timelineSteps; track step.title) {
+              <div class="timeline-item" [class.timeline-item--done]="step.state === 'done'" [class.timeline-item--current]="step.state === 'current'">
+                <div class="timeline-item__rail">
+                  <span class="timeline-item__dot"></span>
+                  <span class="timeline-item__line"></span>
+                </div>
+                <div class="timeline-item__body">
+                  <p class="timeline-item__title" [style.color]="step.state === 'upcoming' ? 'var(--color-ink-faint)' : null">{{ step.title }}</p>
+                  <p class="timeline-item__time">{{ step.time }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap: var(--space-5);">
+
+      <section class="panel">
+        <div class="panel__head"><p class="panel__title">Customer</p></div>
+        <div class="panel__body">
+          <div class="admin-account" style="margin-bottom: var(--space-4);">
+            <span class="admin-account__avatar">{{ customerInitials() }}</span>
+            <div>
+              <p class="admin-account__name">{{ customerName() }}</p>
+              <p class="admin-account__role">{{ customerEmail() }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel__head"><p class="panel__title">Shipping address</p></div>
+        <div class="panel__body">
+          @if (order.address.label) {
+            <p class="cell-strong" style="margin-bottom: var(--space-1);">{{ order.address.label }}</p>
+          }
+          <p class="cell-muted">{{ addressLine1() }}</p>
+          <p class="cell-muted">{{ addressLine2() }}</p>
+          @if (order.address.phone) {
+            <p class="cell-muted">{{ order.address.phone }}</p>
+          }
+        </div>
+      </section>
+
+    </div>
+
+  </div>
+
+}

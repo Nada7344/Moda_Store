@@ -1,0 +1,356 @@
+.address-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+.address-card {
+  position: relative;
+  display: block;
+  border: 1px solid var(--color-gray);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    background var(--duration-fast) var(--ease-standard);
+}
+
+.address-card:hover {
+  border-color: var(--color-primary-dark);
+}
+
+.address-card--manage {
+  cursor: default;
+}
+
+.address-card--manage:hover {
+  border-color: var(--color-gray);
+}
+
+.address-card--manage.address-card--is-default {
+  border-color: var(--color-ink);
+  background: var(--color-beige-tint);
+}
+
+.address-card__top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.address-card__label {
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-semibold);
+  text-transform: capitalize;
+  color: var(--color-ink);
+}
+
+.address-card__default {
+  font-size: var(--fs-caption);
+  color: var(--color-ink-faint);
+  border: 1px solid var(--color-gray);
+  border-radius: var(--radius-pill);
+  padding: 0.1rem 0.6rem;
+}
+
+.address-card__lines {
+  font-size: var(--fs-small);
+  color: var(--color-ink-soft);
+  margin-bottom: var(--space-2);
+  line-height: var(--lh-body);
+}
+
+.address-card__phone {
+  font-size: var(--fs-small);
+  color: var(--color-ink-faint);
+}
+
+.address-card__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-gray);
+  font-size: var(--fs-small);
+}
+
+.address-card__action {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--color-ink-soft);
+  font: inherit;
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+}
+
+.address-card__action:hover {
+  color: var(--color-ink);
+}
+
+.address-card__action--danger {
+  color: var(--color-danger);
+  margin-left: auto;
+}
+
+.address-card__action--danger:hover {
+  color: color-mix(in srgb, var(--color-danger) 80%, black);
+}
+
+.address-card--add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+
+  border: 1px dashed var(--color-gray);
+  border-radius: var(--radius-md);
+
+  background: transparent;
+
+  color: var(--color-ink-soft);
+  font-size: var(--fs-small);
+  font-weight: var(--fw-medium);
+
+  min-height: 128px;
+  width: 100%;
+
+  cursor: pointer;
+}
+
+.address-card--add:hover {
+  border-color: var(--color-ink);
+  color: var(--color-ink);
+}
+
+.address-card__add-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+
+/* =========================
+   Messages
+   ========================= */
+
+.message {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+  font-size: var(--fs-small);
+}
+
+.message--error {
+  color: var(--color-danger);
+  background: rgba(201, 122, 109, 0.1);
+}
+
+.message--success {
+  color: var(--color-ink);
+  background: var(--color-beige-tint);
+}
+
+
+/* =========================
+   Empty state
+   ========================= */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+
+  padding: var(--space-8);
+  border: 1px solid var(--color-gray);
+  border-radius: var(--radius-md);
+}
+
+.empty-state__icon {
+  width: 44px;
+  height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: var(--space-4);
+
+  border-radius: var(--radius-pill);
+  background: var(--color-beige);
+
+  font-size: 1.5rem;
+}
+
+.empty-state h3 {
+  margin-bottom: var(--space-2);
+}
+
+.empty-state p {
+  margin-bottom: var(--space-5);
+  font-size: var(--fs-small);
+}
+
+
+/* =========================
+   Modal
+   ========================= */
+
+.modal {
+  display: flex;
+
+  position: fixed;
+  inset: 0;
+
+  z-index: 100;
+
+  align-items: center;
+  justify-content: center;
+}
+
+.modal__overlay {
+  position: absolute;
+  inset: 0;
+
+  border: 0;
+
+  background: rgba(38, 49, 58, 0.45);
+
+  backdrop-filter: blur(2px);
+
+  cursor: pointer;
+}
+
+.modal__panel {
+  position: relative;
+
+  width: min(420px, calc(100vw - 2.5rem));
+
+  background: var(--color-white);
+
+  border-radius: var(--radius-lg);
+
+  box-shadow: var(--shadow-lg);
+
+  padding: var(--space-6);
+
+  animation: modal-in var(--duration-base) var(--ease-standard);
+}
+
+.modal__panel--form {
+  width: min(560px, calc(100vw - 2.5rem));
+  max-height: calc(100vh - 3rem);
+  overflow-y: auto;
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+
+  margin-bottom: var(--space-3);
+}
+
+.modal__title {
+  font-size: var(--fs-h3);
+}
+
+.modal__close {
+  flex-shrink: 0;
+
+  width: 28px;
+  height: 28px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  border-radius: var(--radius-pill);
+
+  background: transparent;
+
+  color: var(--color-ink-faint);
+
+  cursor: pointer;
+
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.modal__close:hover {
+  background: var(--color-beige-tint);
+  color: var(--color-ink);
+}
+
+.modal__body {
+  font-size: var(--fs-small);
+  color: var(--color-ink-soft);
+  line-height: var(--lh-body);
+
+  margin-bottom: var(--space-6);
+}
+
+.modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+.modal__actions .btn {
+  padding: 0.75rem 1.5rem;
+}
+
+.btn--danger {
+  background: var(--color-danger);
+  color: var(--color-white);
+}
+
+.btn--danger:hover {
+  background: color-mix(in srgb, var(--color-danger) 80%, black);
+}
+
+.address-default-check {
+  margin-top: var(--space-4);
+}
+
+
+/* =========================
+   Responsive
+   ========================= */
+
+@media (max-width: 900px) {
+  .address-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .address-card__actions {
+    flex-wrap: wrap;
+  }
+
+  .address-card__action--danger {
+    margin-left: 0;
+  }
+
+  .modal__panel {
+    width: calc(100vw - 2rem);
+  }
+}

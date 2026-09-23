@@ -1,0 +1,128 @@
+<div class="page-head">
+  <div>
+    <p class="eyebrow page-head__eyebrow">Sales</p>
+    <h1>Orders</h1>
+    <p class="page-head__sub">Track and update every order placed on the storefront.</p>
+  </div>
+</div>
+
+<section class="panel">
+  <div class="filters-bar">
+    <label class="filters-bar__search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input
+        type="search"
+        placeholder="Search by order # or customer…"
+        aria-label="Search orders"
+        [(ngModel)]="searchTerm"
+      />
+    </label>
+
+    <select
+      class="field__select"
+      aria-label="Status"
+      [ngModel]="statusFilter"
+      (ngModelChange)="onStatusFilterChange($event)"
+    >
+      <option value="">All statuses</option>
+      @for (status of statuses; track status) {
+        <option [value]="status">{{ status }}</option>
+      }
+    </select>
+
+    <input
+      class="field__input"
+      type="date"
+      aria-label="From date"
+      style="width:auto;"
+      [(ngModel)]="fromDate"
+      (ngModelChange)="onDateFilterChange()"
+    />
+    <input
+      class="field__input"
+      type="date"
+      aria-label="To date"
+      style="width:auto;"
+      [(ngModel)]="toDate"
+      (ngModelChange)="onDateFilterChange()"
+    />
+  </div>
+
+  @if (errorMessage) {
+
+    <p class="panel__body" style="color: var(--color-danger);">{{ errorMessage }}</p>
+
+  } @else if (isLoading) {
+
+    <p class="panel__body">Loading orders…</p>
+
+  } @else if (!visibleOrders.length) {
+
+    <div class="table-empty">No orders match these filters.</div>
+
+  } @else {
+
+    <div class="table-wrap">
+      <table class="table table--admin">
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>Customer</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (order of visibleOrders; track order._id) {
+            <tr>
+              <td>
+                <a [routerLink]="['/admin/orders', order._id]" class="cell-strong">{{ orderCode(order._id) }}</a>
+                <div class="cell-muted">{{ order.createdAt | date:'MMM d, y' }}</div>
+              </td>
+              <td>{{ customerName(order) }}</td>
+              <td class="cell-muted">{{ itemsCount(order) }} item{{ itemsCount(order) === 1 ? '' : 's' }}</td>
+              <td class="cell-strong">EGP {{ order.totalPrice | number:'1.0-0' }}</td>
+              <td><app-status-badge [status]="order.status"></app-status-badge></td>
+              <td>
+                <a [routerLink]="['/admin/orders', order._id]" class="row-actions__btn" aria-label="View">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2.5 12S6 5 12 5s9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7Z"/><circle cx="12" cy="12" r="2.6"/></svg>
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel__foot">
+      <p class="panel__foot-note">Showing {{ rangeStart }}–{{ rangeEnd }} of {{ docsCount }} orders</p>
+
+      @if (pages > 1) {
+        <nav class="pagination" aria-label="Pagination">
+          <a
+            class="pagination__item pagination__item--nav"
+            [class.pagination__item--disabled]="page === 1"
+            (click)="goToPage(page - 1)"
+          >Prev</a>
+
+          @for (p of pageNumbers; track p) {
+            <a
+              class="pagination__item"
+              [class.pagination__item--active]="p === page"
+              (click)="goToPage(p)"
+            >{{ p }}</a>
+          }
+
+          <a
+            class="pagination__item pagination__item--nav"
+            [class.pagination__item--disabled]="page === pages"
+            (click)="goToPage(page + 1)"
+          >Next</a>
+        </nav>
+      }
+    </div>
+
+  }
+</section>

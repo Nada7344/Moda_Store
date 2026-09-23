@@ -1,0 +1,145 @@
+<article class="order-card">
+
+  <!-- TOP -->
+
+  <div class="order-card__top">
+
+    <div>
+
+      <p class="order-card__id">
+
+        Order {{ formattedOrderId }}
+
+      </p>
+
+
+      <p class="order-card__date">
+
+        Placed on
+        {{ order.orderedAt | date:'MMMM d, y' }}
+
+      </p>
+
+    </div>
+
+
+    <!-- STATUS -->
+
+    <span
+      class="status-badge"
+      [class]="statusClass"
+    >
+
+      {{ getStatusLabel() }}
+
+    </span>
+
+  </div>
+
+
+  <!-- BODY -->
+
+  <div class="order-card__body">
+
+
+    <!-- PRODUCT THUMBNAILS -->
+
+    <div
+      class="order-card__thumbs"
+      aria-label="Order products"
+    >
+
+      @for (
+        item of order.products.slice(0, 3);
+        track item.productId._id
+      ) {
+
+        <span class="order-card__thumb">
+
+          @if (item.productId.images.length) {
+
+            <img
+              [src]="item.productId.images[0].secure_url"
+              [alt]="item.productId.name"
+            />
+
+          }
+
+          @else {
+
+            <svg
+              viewBox="0 0 100 130"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              aria-hidden="true"
+            >
+
+              <path
+                d="M30 20 L20 32 L26 42 L34 36 L34 108 L66 108 L66 36 L74 42 L80 32 L70 20 L62 20 C62 26 57 30 50 30 C43 30 38 26 38 20 Z"
+              />
+
+            </svg>
+
+          }
+
+        </span>
+
+      }
+
+
+      @if (order.products.length > 3) {
+
+        <span
+          class="order-card__thumb order-card__thumb--more"
+        >
+
+          +{{ order.products.length - 3 }}
+
+        </span>
+
+      }
+
+    </div>
+
+
+    <!-- META -->
+
+    <div class="order-card__meta">
+
+      <p>
+
+        {{ itemsCount }}
+
+        {{ itemsCount === 1 ? 'item' : 'items' }}
+
+      </p>
+
+
+      <p class="order-card__total">
+
+         {{ order.totalPrice | number:'1.2-2' }} EGP
+
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!--FOOTER -->
+
+  <div class="order-card__footer">
+
+    <a
+      class="btn btn--secondary btn--sm"
+      [routerLink]="['/orders', order._id]"
+    >
+
+      View Details
+
+    </a>
+
+  </div>
+
+</article>

@@ -1,0 +1,141 @@
+<main class="profile page-shell">
+
+  @if (loading) {
+
+    <section class="state-box">
+      <p>Loading profile...</p>
+    </section>
+
+  } @else if (errorMessage) {
+
+    <section class="state-box state-box--error">
+      <p>{{ errorMessage }}</p>
+
+      <a
+        routerLink="/home"
+        class="btn btn--primary"
+      >
+        Back Home
+      </a>
+    </section>
+
+  } @else if (user) {
+
+    <!-- Profile Header -->
+
+    <header class="profile-head">
+
+      <nav class="breadcrumb">
+
+        <a routerLink="/home">
+          Home
+        </a>
+
+        <span>/</span>
+
+        <span>Account</span>
+
+      </nav>
+
+
+      <div class="profile-identity">
+
+        <div class="profile-identity__avatar">
+          {{ user.name.charAt(0).toUpperCase() }}
+        </div>
+
+
+        <div class="profile-identity__meta">
+
+          <h1>
+            {{ user.name }}
+          </h1>
+
+          <p>
+            {{ user.email }}
+          </p>
+
+          @if (user.isVerified) {
+
+            <span class="verified-badge">
+              Verified
+            </span>
+
+          }
+
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <!-- Profile Layout -->
+
+    <div class="profile-layout">
+
+
+      <!-- Account Navigation -->
+
+      <aside class="account-nav">
+
+        <a
+          routerLink="/profile/personal-information"
+          routerLinkActive="account-nav__link--active"
+          class="account-nav__link"
+        >
+          Personal Information
+        </a>
+
+
+        <a
+          routerLink="/profile/addresses"
+          routerLinkActive="account-nav__link--active"
+          class="account-nav__link"
+        >
+          Addresses
+        </a>
+
+
+        <a
+          routerLink="/profile/password"
+          routerLinkActive="account-nav__link--active"
+          class="account-nav__link"
+        >
+          Password
+        </a>
+
+
+        <a
+          routerLink="/profile/orders"
+          routerLinkActive="account-nav__link--active"
+          class="account-nav__link"
+        >
+          Recent Orders
+        </a>
+
+
+        <button
+          type="button"
+          class="account-nav__link account-nav__link--danger"
+          (click)="logout()"
+        >
+          Log Out
+        </button>
+
+      </aside>
+
+
+      <!-- Routed Profile Content -->
+
+      <div class="profile-content">
+
+        <router-outlet></router-outlet>
+
+      </div>
+
+    </div>
+
+  }
+
+</main>

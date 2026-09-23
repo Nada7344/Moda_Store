@@ -1,0 +1,27 @@
+
+.rating {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.rating__stars {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.rating__stars svg {
+  width: 14px;
+  height: 14px;
+  color: var(--color-gray);
+}
+
+.rating__stars svg.is-filled { color: var(--color-primary-dark); }
+
+.rating__count {
+  font-size: var(--fs-caption);
+  color: var(--color-ink-faint);
+}
+
+.rating--lg .rating__stars svg { width: 20px; height: 20px; }
+.rating--lg .rating__count { font-size: var(--fs-small); }

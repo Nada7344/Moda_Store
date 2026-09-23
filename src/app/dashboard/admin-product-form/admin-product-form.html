@@ -1,0 +1,210 @@
+<div class="page-head">
+  <div>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a routerLink="/admin/products">Products</a>
+      <span aria-hidden="true">/</span>
+      <span class="breadcrumb__current">{{ isEditMode ? (form.name || 'Edit product') : 'New product' }}</span>
+    </nav>
+    <h1>{{ isEditMode ? 'Edit product' : 'New product' }}</h1>
+  </div>
+  <div class="page-head__actions">
+    <a routerLink="/admin/products" class="btn btn--secondary btn--sm">Cancel</a>
+    <button type="submit" form="product-form" class="btn btn--primary btn--sm" [disabled]="isSaving">
+      {{ isSaving ? 'Saving…' : (isEditMode ? 'Save changes' : 'Create product') }}
+    </button>
+  </div>
+</div>
+
+@if (errorMessage) {
+  <div class="panel" style="margin-bottom: var(--space-5);">
+    <p class="panel__body" style="padding: var(--space-4) var(--space-5); color: var(--color-danger);">{{ errorMessage }}</p>
+  </div>
+}
+
+@if (successMessage) {
+  <div class="panel" style="margin-bottom: var(--space-5);">
+    <p class="panel__body" style="padding: var(--space-4) var(--space-5); color: var(--color-success);">{{ successMessage }}</p>
+  </div>
+}
+
+@if (isLoading) {
+
+  <p class="page-head__sub">Loading product…</p>
+
+} @else {
+
+  <form id="product-form" class="content-grid" (ngSubmit)="save()">
+
+    <div style="display:flex; flex-direction:column; gap: var(--space-5);">
+
+      <div class="form-card">
+        <p class="form-card__title">Basic information</p>
+        <p class="form-card__sub">Name, description and where it lives in the catalog.</p>
+
+        <div class="form-grid">
+          <div class="field form-grid__full">
+            <label class="field__label" for="p-name">Product name</label>
+            <input
+              class="field__input"
+              id="p-name"
+              type="text"
+              name="name"
+              placeholder="e.g. Wool Overcoat"
+              [(ngModel)]="form.name"
+            />
+          </div>
+
+          <div class="field form-grid__full">
+            <label class="field__label" for="p-desc">Description</label>
+            <textarea
+              class="field__textarea"
+              id="p-desc"
+              name="description"
+              rows="5"
+              placeholder="Tell customers about this product…"
+              [(ngModel)]="form.description"
+            ></textarea>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="p-category">Category</label>
+            <select
+              class="field__select"
+              id="p-category"
+              name="category"
+              [ngModel]="form.category"
+              (ngModelChange)="onCategoryChange($event)"
+            >
+              <option value="" disabled>Select a category</option>
+              @for (category of categories; track category._id) {
+                <option [value]="category._id">{{ category.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="p-subcategory">Subcategory</label>
+            <select
+              class="field__select"
+              id="p-subcategory"
+              name="subcategory"
+              [(ngModel)]="form.subcategory"
+              [disabled]="!form.category"
+            >
+              <option value="" disabled>Select a subcategory</option>
+              @for (subcategory of subcategoriesForSelectedCategory; track subcategory._id) {
+                <option [value]="subcategory._id">{{ subcategory.name }}</option>
+              }
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <p class="form-card__title">Images</p>
+        <p class="form-card__sub">Up to 2 images. First image is used as the primary thumbnail.</p>
+
+        <label class="image-drop" for="p-images">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M12 4 7.5 8.5M12 4l4.5 4.5"/><path d="M4 16v2.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V16"/></svg>
+          <p><strong>Click to upload</strong> or drag and drop</p>
+          <p>PNG or JPG, up to 2 images</p>
+          <input
+            id="p-images"
+            type="file"
+            accept="image/png,image/jpeg"
+            multiple
+            class="visually-hidden"
+            (change)="onFilesSelected($any($event.target).files); $any($event.target).value = ''"
+          />
+        </label>
+
+        @if (images.length) {
+          <div class="image-preview-grid">
+            @for (image of images; track image.previewUrl; let i = $index) {
+              <div class="image-preview">
+                <img [src]="image.previewUrl" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" />
+                <span class="image-preview__remove" (click)="removeImage(i)">×</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap: var(--space-5);">
+
+      <div class="form-card">
+        <p class="form-card__title">Pricing &amp; stock</p>
+        <div class="field" style="margin-bottom: var(--space-4);">
+          <label class="field__label" for="p-price">Price (EGP)</label>
+          <input class="field__input" id="p-price" type="number" name="price" min="0" [(ngModel)]="form.price" />
+        </div>
+        <div class="field" style="margin-bottom: var(--space-4);">
+          <label class="field__label" for="p-ship">Shipping price (EGP)</label>
+          <input class="field__input" id="p-ship" type="number" name="shippingPrice" min="0" [(ngModel)]="form.shippingPrice" />
+        </div>
+        <div class="field">
+          <label class="field__label" for="p-stock">Stock quantity</label>
+          <input class="field__input" id="p-stock" type="number" name="stock" min="0" [(ngModel)]="form.stock" />
+        </div>
+      </div>
+
+      <div class="form-card">
+        <p class="form-card__title">Status &amp; flags</p>
+        <div style="display:flex; flex-direction:column; gap: var(--space-3);">
+          <label class="check">
+            <input type="checkbox" name="isActive" [(ngModel)]="form.isActive" />
+            <span class="check__box"></span>
+            Active — visible in the storefront
+          </label>
+          <label class="check">
+            <input type="checkbox" name="topSales" [(ngModel)]="form.topSales" />
+            <span class="check__box"></span>
+            Mark as top sale
+          </label>
+          <label class="check">
+            <input type="checkbox" name="newArrival" [(ngModel)]="form.newArrival" />
+            <span class="check__box"></span>
+            Mark as new arrival
+          </label>
+        </div>
+      </div>
+
+      @if (isEditMode) {
+        <div class="form-card">
+          <p class="form-card__title">Danger zone</p>
+          <p class="field__hint" style="margin-bottom: var(--space-4);">Removing a product hides it from the storefront and cannot be undone from here.</p>
+          <button
+            type="button"
+            class="btn btn--secondary btn--sm"
+            style="border-color: var(--color-danger); color: var(--color-danger);"
+            (click)="openDeleteModal()"
+          >Delete product</button>
+        </div>
+      }
+
+    </div>
+
+  </form>
+
+}
+
+@if (showDeleteModal) {
+  <div class="modal" style="display:flex;">
+    <div class="modal__overlay" (click)="closeDeleteModal()"></div>
+    <div class="modal__panel" role="dialog" aria-modal="true">
+      <div class="modal__head">
+        <p class="modal__title">Delete this product?</p>
+        <button type="button" class="modal__close" (click)="closeDeleteModal()" aria-label="Close">×</button>
+      </div>
+      <div class="modal__body">"{{ form.name }}" will be removed from the storefront. Customers who already ordered it keep their order history.</div>
+      <div class="modal__actions">
+        <button type="button" class="btn btn--secondary btn--sm" (click)="closeDeleteModal()">Cancel</button>
+        <button type="button" class="btn btn--danger btn--sm" [disabled]="isDeleting" (click)="deleteProduct()">
+          {{ isDeleting ? 'Deleting…' : 'Delete' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

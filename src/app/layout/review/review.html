@@ -1,0 +1,48 @@
+<article class="review-card">
+
+  <header class="review-card__head">
+
+    <span class="review-card__avatar" aria-hidden="true">
+      {{ customerInitial }}
+    </span>
+
+    <div class="review-card__who">
+
+      <p class="review-card__name">
+        {{ customerName }}
+      </p>
+
+      <app-rating [value]="review.rate" />
+
+    </div>
+
+  </header>
+
+
+  <p class="review-card__message">
+    "{{ review.message }}"
+  </p>
+
+
+  @if (product) {
+
+    <a
+      class="review-card__product"
+      [routerLink]="['/products', product.slug]"
+    >
+
+      @if (productImage) {
+        <img
+          class="review-card__product-img"
+          [src]="productImage"
+          [alt]="product.name"
+        />
+      }
+
+      <span>{{ product.name }}</span>
+
+    </a>
+
+  }
+
+</article>

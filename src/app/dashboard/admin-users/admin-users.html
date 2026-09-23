@@ -1,0 +1,193 @@
+<div class="page-head">
+  <div>
+    <p class="eyebrow page-head__eyebrow">People</p>
+    <h1>Users</h1>
+    <p class="page-head__sub">Everyone with a storefront account. Block accounts that violate store policy.</p>
+  </div>
+</div>
+
+<section class="panel">
+  <div class="filters-bar">
+    <label class="filters-bar__search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input
+        type="search"
+        placeholder="Search by name or email…"
+        aria-label="Search users"
+        [(ngModel)]="searchTerm"
+      />
+    </label>
+
+    <select class="field__select" aria-label="Status" [(ngModel)]="statusFilter">
+      <option value="">All users</option>
+      <option value="active">Active</option>
+      <option value="blocked">Blocked</option>
+    </select>
+  </div>
+
+  @if (errorMessage) {
+
+    <p class="panel__body" style="color: var(--color-danger);">{{ errorMessage }}</p>
+
+  } @else if (isLoading) {
+
+    <p class="panel__body">Loading users…</p>
+
+  } @else if (!visibleUsers.length) {
+
+    <div class="table-empty">No users match these filters.</div>
+
+  } @else {
+
+    <div class="table-wrap">
+      <table class="table table--admin">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Orders</th>
+            <th>Joined</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of visibleUsers; track user._id) {
+            <tr>
+              <td>
+                <div class="cell-entity">
+                  <span class="admin-account__avatar" style="width:38px;height:38px;">{{ initials(user) }}</span>
+                  <p class="cell-entity__name">{{ user.name }}</p>
+                </div>
+              </td>
+              <td class="cell-muted">{{ user.email }}</td>
+              <td class="cell-muted">{{ ordersCount(user) }}</td>
+              <td class="cell-muted">{{ user.createdAt | date:'MMM d, y' }}</td>
+              <td><span class="toggle-pill" [class.toggle-pill--on]="!user.isBlocked">{{ user.isBlocked ? 'Blocked' : 'Active' }}</span></td>
+              <td>
+                <div class="row-actions">
+                  <button type="button" class="row-actions__btn" aria-label="View" (click)="openDetails(user)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2.5 12S6 5 12 5s9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7Z"/><circle cx="12" cy="12" r="2.6"/></svg>
+                  </button>
+                  <button
+                    type="button"
+                    class="row-actions__btn"
+                    [class.row-actions__btn--danger]="!user.isBlocked"
+                    [attr.aria-label]="user.isBlocked ? 'Unblock user' : 'Block user'"
+                    [disabled]="isBusy(user._id)"
+                    (click)="toggleBlocked(user)"
+                  >
+                    @if (user.isBlocked) {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 10.5V8a6 6 0 0 1 10.5-4"/><rect x="5" y="10.5" width="14" height="10" rx="2"/></svg>
+                    } @else {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><path d="m6.5 6.5 11 11"/></svg>
+                    }
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel__foot">
+      <p class="panel__foot-note">Showing {{ rangeStart }}–{{ rangeEnd }} of {{ docsCount }} users</p>
+
+      @if (pages > 1) {
+        <nav class="pagination" aria-label="Pagination">
+          <a
+            class="pagination__item pagination__item--nav"
+            [class.pagination__item--disabled]="page === 1"
+            (click)="goToPage(page - 1)"
+          >Prev</a>
+
+          @for (p of pageNumbers; track p) {
+            <a
+              class="pagination__item"
+              [class.pagination__item--active]="p === page"
+              (click)="goToPage(p)"
+            >{{ p }}</a>
+          }
+
+          <a
+            class="pagination__item pagination__item--nav"
+            [class.pagination__item--disabled]="page === pages"
+            (click)="goToPage(page + 1)"
+          >Next</a>
+        </nav>
+      }
+    </div>
+
+  }
+</section>
+
+@if (userForDetails) {
+  <div class="modal" style="display:flex;">
+    <div class="modal__overlay" (click)="closeDetails()"></div>
+    <div class="modal__panel modal__panel--form" role="dialog" aria-modal="true">
+      <div class="modal__head">
+        <p class="modal__title">{{ userForDetails.name }}</p>
+        <button type="button" class="modal__close" (click)="closeDetails()" aria-label="Close">×</button>
+      </div>
+      <div class="modal__body">
+
+        @if (isLoadingDetails) {
+          <p class="cell-muted">Loading…</p>
+        } @else {
+
+          <div class="admin-account" style="margin-bottom: var(--space-4);">
+            <span class="admin-account__avatar">{{ initials(userForDetails) }}</span>
+            <div>
+              <p class="admin-account__name">{{ userForDetails.name }}</p>
+              <p class="admin-account__role">{{ userForDetails.email }}</p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="field">
+              <p class="field__label">Phone</p>
+              <p class="cell-muted">{{ userForDetails.phone || '—' }}</p>
+            </div>
+            <div class="field">
+              <p class="field__label">Gender</p>
+              <p class="cell-muted">{{ userForDetails.gender || '—' }}</p>
+            </div>
+            <div class="field">
+              <p class="field__label">Orders placed</p>
+              <p class="cell-muted">{{ ordersCount(userForDetails) }}</p>
+            </div>
+            <div class="field">
+              <p class="field__label">Joined</p>
+              <p class="cell-muted">{{ userForDetails.createdAt | date:'MMM d, y' }}</p>
+            </div>
+            <div class="field">
+              <p class="field__label">Verified</p>
+              <p class="cell-muted">{{ userForDetails.isVerified ? 'Yes' : 'No' }}</p>
+            </div>
+            <div class="field">
+              <p class="field__label">Status</p>
+              <p class="cell-muted">{{ userForDetails.isBlocked ? 'Blocked' : 'Active' }}</p>
+            </div>
+          </div>
+
+          @if (userForDetails.address.length) {
+            <div class="field" style="margin-top: var(--space-4);">
+              <p class="field__label" style="margin-bottom: var(--space-2);">Saved addresses</p>
+              <div style="display:flex; flex-direction:column; gap: var(--space-2);">
+                @for (addr of userForDetails.address; track addr._id) {
+                  <p class="cell-muted">{{ addr.label }} — {{ addr.street }}, {{ addr.city }}, {{ addr.country }}</p>
+                }
+              </div>
+            </div>
+          }
+
+        }
+
+      </div>
+      <div class="modal__actions">
+        <button type="button" class="btn btn--secondary btn--sm" (click)="closeDetails()">Close</button>
+      </div>
+    </div>
+  </div>
+}

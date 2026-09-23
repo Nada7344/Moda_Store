@@ -1,0 +1,37 @@
+
+/* ============================================================
+   STATUS BADGE — reusable wherever an order/review/user status
+   is shown (orders list, order details, admin tables)
+   ============================================================ */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-semibold);
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+.status-badge::before {
+  content: "";
+  width: 6px; height: 6px;
+  border-radius: var(--radius-pill);
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* ---- Order lifecycle ---- */
+.status-badge--pending      { background: rgba(209, 168, 92, 0.16);  color: #a3792f; }
+.status-badge--in-progress  { background: var(--color-primary-tint); color: var(--color-primary-dark); }
+.status-badge--shipped      { background: var(--color-primary-tint); color: #3f7ea0; }
+.status-badge--delivered    { background: rgba(126, 168, 138, 0.16); color: var(--color-success); }
+.status-badge--cancelled    { background: var(--color-gray); color: var(--color-ink-soft); }
+.status-badge--rejected     { background: rgba(201, 122, 109, 0.16); color: var(--color-danger); }
+.status-badge--refunded     { background: var(--color-muted-blue); color: var(--color-ink); }
+
+/* ---- Review lifecycle ---- */
+.status-badge--unread    { background: var(--color-gray); color: var(--color-ink-soft); }
+.status-badge--approved  { background: rgba(126, 168, 138, 0.16); color: var(--color-success); }
+.status-badge--declined  { background: rgba(201, 122, 109, 0.16); color: var(--color-danger); }

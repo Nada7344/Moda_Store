@@ -1,0 +1,27 @@
+<header class="admin-topbar">
+
+  <label for="sidebar-toggle" class="admin-topbar__menu-btn" aria-label="Open menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </label>
+
+  <label class="admin-topbar__search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+    <input
+      type="search"
+      [(ngModel)]="searchTerm"
+      placeholder="Search orders, products, users…"
+      aria-label="Search"
+    />
+  </label>
+
+  <div class="admin-topbar__actions">
+
+    <button type="button" class="admin-topbar__icon-btn" aria-label="Notifications">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 9a6 6 0 1 1 12 0c0 4 1.5 5.5 1.5 5.5H4.5S6 13 6 9Z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>
+    </button>
+
+    <span class="admin-account__avatar">{{ initials }}</span>
+
+  </div>
+
+</header>

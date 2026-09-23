@@ -1,0 +1,433 @@
+<section class="profile-section" id="addresses">
+
+  <div class="profile-section__head">
+    <h2 class="profile-section__title">Addresses</h2>
+
+    <p class="profile-section__hint">
+      Manage the addresses used for delivery at checkout.
+    </p>
+  </div>
+
+  <!-- Messages -->
+
+  <div *ngIf="errorMessage" class="message message--error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="successMessage" class="message message--success">
+    {{ successMessage }}
+  </div>
+
+  <!-- Loading -->
+
+  <div *ngIf="isLoading" class="address-loading">
+    Loading addresses...
+  </div>
+
+  <!-- Empty -->
+
+  <div
+    *ngIf="!isLoading && addresses.length === 0"
+    class="empty-state"
+  >
+    <div class="empty-state__icon">
+      +
+    </div>
+
+    <h3>No saved addresses</h3>
+
+    <p>
+      Add an address to speed up checkout next time.
+    </p>
+
+    <button
+      type="button"
+      class="btn btn--primary"
+      (click)="openAddModal()"
+    >
+      Add Address
+    </button>
+  </div>
+
+  <!-- Addresses -->
+
+  <div
+    *ngIf="!isLoading && addresses.length > 0"
+    class="address-grid"
+  >
+
+    <div
+      *ngFor="let address of addresses"
+      class="address-card address-card--manage"
+      [class.address-card--is-default]="address.isDefault"
+    >
+
+      <div class="address-card__top">
+
+        <span class="address-card__label">
+          {{ address.label | titlecase }}
+        </span>
+
+        <span
+          *ngIf="address.isDefault"
+          class="address-card__default"
+        >
+          Default
+        </span>
+
+      </div>
+
+      <p class="address-card__lines">
+        {{ getAddressLines(address) }}
+      </p>
+
+      <p
+        *ngIf="address.phone"
+        class="address-card__phone"
+      >
+        {{ address.phone }}
+      </p>
+
+      <div class="address-card__actions">
+
+        <button
+          type="button"
+          class="address-card__action"
+          (click)="openEditModal(address)"
+        >
+          Edit
+        </button>
+
+        <button
+          *ngIf="!address.isDefault"
+          type="button"
+          class="address-card__action"
+          (click)="setDefaultAddress(address._id)"
+        >
+          Set default
+        </button>
+
+        <span
+          *ngIf="address.isDefault"
+          class="address-card__action"
+        >
+          Default address
+        </span>
+
+        <button
+          type="button"
+          class="address-card__action address-card__action--danger"
+          (click)="openDeleteModal(address._id)"
+        >
+          Delete
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- Add -->
+
+    <button
+      type="button"
+      class="address-card address-card--add"
+      (click)="openAddModal()"
+    >
+      <span class="address-card__add-icon">+</span>
+      <span>Add new address</span>
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- ADD / EDIT MODAL -->
+
+<div
+  *ngIf="isModalOpen"
+  class="modal"
+>
+
+  <button
+    type="button"
+    class="modal__overlay"
+    aria-label="Close"
+    (click)="closeModal()"
+  ></button>
+
+  <div
+    class="modal__panel modal__panel--form"
+    role="dialog"
+    aria-modal="true"
+  >
+
+    <div class="modal__head">
+
+      <h3 class="modal__title">
+        {{ isEditMode ? 'Edit Address' : 'Add New Address' }}
+      </h3>
+
+      <button
+        type="button"
+        class="modal__close"
+        (click)="closeModal()"
+        [disabled]="isSubmitting"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <div class="modal__body">
+
+      <div class="form-grid">
+
+        <!-- Street -->
+
+        <div class="field">
+          <label class="field__label">
+            Street
+          </label>
+
+          <input
+            class="field__input"
+            type="text"
+            [(ngModel)]="form.street"
+            placeholder="Street name and number"
+          />
+        </div>
+
+        <!-- City -->
+
+        <div class="field">
+          <label class="field__label">
+            City
+          </label>
+
+          <input
+            class="field__input"
+            type="text"
+            [(ngModel)]="form.city"
+            placeholder="City"
+          />
+        </div>
+
+        <!-- Building -->
+
+        <div class="field">
+          <label class="field__label">
+            Building
+            <span class="field__hint">(optional)</span>
+          </label>
+
+          <input
+            class="field__input"
+            type="text"
+            [(ngModel)]="form.building"
+            placeholder="Building"
+          />
+        </div>
+
+        <!-- Apartment -->
+
+        <div class="field">
+          <label class="field__label">
+            Apartment
+            <span class="field__hint">(optional)</span>
+          </label>
+
+          <input
+            class="field__input"
+            type="text"
+            [(ngModel)]="form.apartment"
+            placeholder="Apartment"
+          />
+        </div>
+
+        <!-- Label -->
+
+        <div class="field">
+
+          <label class="field__label">
+            Label
+          </label>
+
+          <select
+            class="field__select"
+            [(ngModel)]="form.label"
+          >
+            <option value="Home">Home</option>
+            <option value="Work">Work</option>
+            <option value="Other">Other</option>
+          </select>
+
+        </div>
+
+        <!-- Phone -->
+
+        <div class="field">
+
+          <label class="field__label">
+            Phone
+            <span class="field__hint">(optional)</span>
+          </label>
+
+          <input
+            class="field__input"
+            type="tel"
+            [(ngModel)]="form.phone"
+            placeholder="+20 1xx xxx xxxx"
+          />
+
+        </div>
+
+        <!-- State -->
+
+        <div class="field">
+
+          <label class="field__label">
+            State
+            <span class="field__hint">(optional)</span>
+          </label>
+
+          <input
+            class="field__input"
+            type="text"
+            [(ngModel)]="form.state"
+            placeholder="State"
+          />
+
+        </div>
+
+        <!-- Postal Code -->
+
+        <div class="field">
+
+          <label class="field__label">
+            Postal Code
+            <span class="field__hint">(optional)</span>
+          </label>
+
+          <input
+            class="field__input"
+            type="text"
+            [(ngModel)]="form.postalCode"
+            placeholder="Postal code"
+          />
+
+        </div>
+
+      </div>
+
+      <label class="check address-default-check">
+
+        <input
+          type="checkbox"
+          [(ngModel)]="form.isDefault"
+        />
+
+        <span class="check__box"></span>
+
+        Set as default address
+
+      </label>
+
+    </div>
+
+    <div class="modal__actions">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="closeModal()"
+        [disabled]="isSubmitting"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="saveAddress()"
+        [disabled]="isSubmitting"
+      >
+        {{ isSubmitting ? 'Saving...' : (isEditMode ? 'Save Changes' : 'Save Address') }}
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- DELETE MODAL -->
+
+<div
+  *ngIf="isDeleteModalOpen"
+  class="modal"
+>
+
+  <button
+    type="button"
+    class="modal__overlay"
+    aria-label="Close"
+    (click)="closeDeleteModal()"
+  ></button>
+
+  <div
+    class="modal__panel"
+    role="dialog"
+    aria-modal="true"
+  >
+
+    <div class="modal__head">
+
+      <h3 class="modal__title">
+        Delete this address?
+      </h3>
+
+      <button
+        type="button"
+        class="modal__close"
+        (click)="closeDeleteModal()"
+        [disabled]="isSubmitting"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <div class="modal__body">
+
+      This address will be permanently removed
+      from your account. This can't be undone.
+
+    </div>
+
+    <div class="modal__actions">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="closeDeleteModal()"
+        [disabled]="isSubmitting"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--danger"
+        (click)="deleteAddress()"
+        [disabled]="isSubmitting"
+      >
+        {{ isSubmitting ? 'Deleting...' : 'Delete Address' }}
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

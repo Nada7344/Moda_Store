@@ -1,0 +1,8 @@
+@import './styles/variables.css';
+@import './styles/reset.css';
+@import './styles/global.css';
+@import './styles/auth.css';
+@import './styles/admin.css';
+@import './styles/Globalstatusbadge.css';
+@import './styles/pagination.css';
+@import './styles/modal.css';

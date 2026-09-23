@@ -1,0 +1,724 @@
+<section class="pdp">
+
+  <div class="container">
+
+
+    <!--
+         LOADING
+   -->
+
+    @if (isLoading) {
+
+      <div class="pdp__loading">
+
+        <p>Loading product...</p>
+
+      </div>
+
+    }
+
+
+    <!--
+         ERROR
+   -->
+
+    @else if (!product) {
+
+      <div class="pdp__empty">
+
+        <h1>Product not found</h1>
+
+        <p>
+          {{ errorMessage }}
+        </p>
+
+      </div>
+
+    }
+
+
+    <!--
+         PRODUCT
+   -->
+
+    @else {
+
+
+      <!--
+           BREADCRUMB
+     -->
+
+      <nav
+        class="breadcrumb"
+        aria-label="Breadcrumb"
+      >
+
+        <a routerLink="/">
+          Home
+        </a>
+
+        <span>/</span>
+
+        <a routerLink="/products">
+          Products
+        </a>
+
+        <span>/</span>
+
+        <span class="breadcrumb__current">
+          {{ product.name }}
+        </span>
+
+      </nav>
+
+
+
+      <!--
+           PRODUCT LAYOUT
+      -->
+
+      <div class="pdp__layout">
+
+
+        <!--
+             GALLERY
+       -->
+
+        <div class="pdp__gallery">
+
+
+          <!-- MAIN IMAGE -->
+
+          <div class="gallery__main">
+
+            @if (product.images.length > 0) {
+
+              <img
+                [src]="product.images[selectedImage].secure_url"
+                [alt]="product.name"
+              >
+
+            } @else {
+
+              <div class="gallery__placeholder">
+
+                No Image
+
+              </div>
+
+            }
+
+          </div>
+
+
+          <!-- THUMBNAILS -->
+
+          @if (product.images.length > 1) {
+
+            <div class="gallery__thumbs">
+
+              @for (
+                image of product.images;
+                track $index
+              ) {
+
+                <button
+                  type="button"
+                  class="gallery__thumb"
+                  [class.gallery__thumb--active]="
+                    selectedImage === $index
+                  "
+                  (click)="selectImage($index)"
+                  [attr.aria-label]="'View image ' + ($index + 1)"
+                >
+
+                  <img
+                    [src]="image.secure_url"
+                    [alt]="product.name + ' image ' + ($index + 1)"
+                  >
+
+                </button>
+
+              }
+
+            </div>
+
+          }
+
+        </div>
+
+
+
+        <!--
+             PRODUCT INFO
+         -->
+
+        <div
+          class="pdp__info"
+          appScrollReveal
+        >
+
+
+          <p class="pdp__category">
+
+            {{ product.category.name }}
+
+            /
+
+            {{ product.subcategory.name }}
+
+          </p>
+
+
+          <h1 class="pdp__title">
+            {{ product.name }}
+          </h1>
+
+
+          <!-- RATING -->
+
+          <div class="pdp__rating-row">
+
+            <div class="rating rating--lg">
+
+              <span class="rating__stars">
+
+                @for (
+                  star of getStars(product.ratingsAverage);
+                  track star
+                ) {
+
+                  <span
+                    class="rating__star"
+                    [class.is-filled]="
+                      isStarFilled(
+                        star,
+                        product.ratingsAverage
+                      )
+                    "
+                  >
+                    ★
+                  </span>
+
+                }
+
+              </span>
+
+
+              <span class="rating__count">
+
+                {{ product.ratingsAverage | number:'1.1-1' }}
+
+              </span>
+
+            </div>
+
+
+            <a href="#reviews">
+
+              {{ reviewsTotal }}
+              {{ reviewsTotal === 1 ? 'review' : 'reviews' }}
+
+            </a>
+
+          </div>
+
+
+
+          <!-- PRICE -->
+
+          <div class="pdp__price-row">
+
+            <span class="pdp__price">
+
+              {{ product.price }} EGP
+
+            </span>
+
+          </div>
+
+
+
+
+
+
+          <!-- STOCK -->
+
+          @if (product.isOutOfStock) {
+
+            <p class="pdp__availability pdp__availability--out">
+
+              Out of Stock
+
+            </p>
+
+          }
+
+          @else if (product.stock <= 3) {
+
+            <p class="pdp__availability pdp__availability--low">
+
+              Only {{ product.stock }} left
+
+            </p>
+
+          }
+
+          @else {
+
+            <p class="pdp__availability">
+
+              In Stock
+
+            </p>
+
+          }
+
+
+
+          <!-- META -->
+
+          <dl class="pdp__meta">
+
+            <div>
+
+              <dt>Category</dt>
+
+              <dd>
+                {{ product.category.name }}
+              </dd>
+
+            </div>
+
+
+
+
+          </dl>
+
+
+
+          <!-- DESCRIPTION -->
+
+          <p class="pdp__desc">
+
+            {{ product.description }}
+
+          </p>
+
+
+
+          <!-- ERROR / SUCCESS MESSAGE -->
+
+          @if (errorMessage) {
+
+            <p class="pdp__message">
+
+              {{ errorMessage }}
+
+            </p>
+
+          }
+
+
+
+          <!-- PURCHASE -->
+
+          <div class="pdp__purchase-row">
+
+
+            <div class="qty-select">
+
+              <button
+                type="button"
+                aria-label="Decrease quantity"
+                (click)="decreaseQuantity()"
+                [disabled]="quantity <= 1"
+              >
+                −
+              </button>
+
+
+              <span>
+                {{ quantity }}
+              </span>
+
+
+              <button
+                type="button"
+                aria-label="Increase quantity"
+                (click)="increaseQuantity()"
+                [disabled]="
+                  quantity >= product.stock
+                "
+              >
+                +
+              </button>
+
+            </div>
+
+
+            <button
+              type="button"
+              class="btn btn--primary"
+              [disabled]="
+                product.isOutOfStock ||
+                isAddingToCart
+              "
+              (click)="addToCart()"
+            >
+
+              @if (isAddingToCart) {
+
+                Adding...
+
+              } @else {
+
+                Add to Cart
+
+              }
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+
+      <!--
+           REVIEWS
+     -->
+
+      <section
+        class="reviews"
+        id="reviews"
+        appScrollReveal
+      >
+
+
+        <h2>
+          Reviews
+        </h2>
+
+
+        <!-- REVIEW SUMMARY -->
+
+        <div class="reviews__summary">
+
+
+          <div class="reviews__avg">
+
+            <p class="reviews__avg-score">
+
+              {{ product.ratingsAverage | number:'1.1-1' }}
+
+            </p>
+
+
+            <div class="rating">
+
+              <span class="rating__stars">
+
+                @for (
+                  star of getStars(product.ratingsAverage);
+                  track star
+                ) {
+
+                  <span
+                    class="rating__star"
+                    [class.is-filled]="
+                      isStarFilled(
+                        star,
+                        product.ratingsAverage
+                      )
+                    "
+                  >
+                    ★
+                  </span>
+
+                }
+
+              </span>
+
+            </div>
+
+
+            <p class="reviews__avg-count">
+
+              Based on
+              {{ reviewsTotal }}
+              reviews
+
+            </p>
+
+          </div>
+
+
+        </div>
+
+
+
+        <!-- REVIEW LIST -->
+
+        @if (isReviewsLoading) {
+
+          <div class="reviews__loading">
+
+            Loading reviews...
+
+          </div>
+
+        }
+
+        @else if (reviews.length === 0) {
+
+          <div class="reviews__empty">
+
+            <p>
+              No reviews yet.
+            </p>
+
+          </div>
+
+        }
+
+        @else {
+
+          <div
+            class="review-list__viewport"
+            [class.has-more]="reviews.length > 1"
+          >
+
+            <div class="review-list">
+
+              @for (
+                review of reviews;
+                track review._id
+              ) {
+
+              <article class="review">
+
+                <div class="review__head">
+
+                  <span class="review__avatar" aria-hidden="true">
+                    {{ review.userId.name.charAt(0).toUpperCase() }}
+                  </span>
+
+                  <div class="review__who">
+
+                    <span class="review__author">
+
+                      {{ review.userId.name }}
+
+                    </span>
+
+                    <div class="rating">
+
+                      <span class="rating__stars">
+
+                        @for (
+                          star of getStars(review.rate);
+                          track star
+                        ) {
+
+                          <span
+                            class="rating__star"
+                            [class.is-filled]="
+                              isStarFilled(
+                                star,
+                                review.rate
+                              )
+                            "
+                          >
+                            ★
+                          </span>
+
+                        }
+
+                      </span>
+
+                    </div>
+
+                  </div>
+
+                  <span class="review__date">
+
+                    {{ review.createdAt | date:'MMM d, y' }}
+
+                  </span>
+
+                </div>
+
+
+                <p class="review__message">
+
+                  {{ review.message }}
+
+                </p>
+
+              </article>
+
+              }
+
+            </div>
+
+          </div>
+
+        }
+
+
+
+        <!--
+             REVIEW FORM
+       -->
+
+        @if (isLoggedIn) {
+
+          <form
+            class="review-form"
+            (ngSubmit)="submitReview()"
+          >
+
+
+            <h3>
+              Write a review
+            </h3>
+
+
+            <!-- STARS -->
+
+            <div
+              class="field"
+              [class.field--error]="
+                (reviewAttempted || reviewRateTouched) && reviewRate < 1
+              "
+            >
+
+              <div
+                class="review-form__stars"
+                aria-label="Rate this product"
+              >
+
+                @for (
+                  star of getStars(5);
+                  track star
+                ) {
+
+                  <button
+                    type="button"
+                    [class.is-filled]="
+                      star <= reviewRate
+                    "
+                    (click)="setReviewRate(star)"
+                    [attr.aria-label]="
+                      'Rate ' + star + ' stars'
+                    "
+                  >
+                    ★
+                  </button>
+
+                }
+
+              </div>
+
+              @if ((reviewAttempted || reviewRateTouched) && reviewRate < 1) {
+
+                <p class="field__hint field__hint--error">
+                  Please select a rating.
+                </p>
+
+              }
+
+            </div>
+
+
+            <!-- MESSAGE -->
+
+            <label
+              class="field"
+              [class.field--error]="
+                (reviewAttempted || reviewMessageTouched) &&
+                reviewMessage.trim().length < reviewMinLength
+              "
+            >
+
+              <span class="field__label">
+                Your review
+              </span>
+
+
+              <textarea
+                class="field__textarea"
+                rows="4"
+                [(ngModel)]="reviewMessage"
+                name="reviewMessage"
+                placeholder="Share how the fit and fabric worked for you"
+                (blur)="onReviewMessageBlur()"
+              ></textarea>
+
+              @if (
+                (reviewAttempted || reviewMessageTouched) &&
+                reviewMessage.trim().length < reviewMinLength
+              ) {
+
+                <p class="field__hint field__hint--error">
+                  Write at least {{ reviewMinLength }} characters.
+
+                </p>
+
+              }
+
+            </label>
+
+
+
+            @if (reviewFeedbackMessage) {
+
+              <p
+                class="review-form__feedback"
+                [class.review-form__feedback--success]="
+                  reviewFeedbackType === 'success'
+                "
+                [class.review-form__feedback--error]="
+                  reviewFeedbackType === 'error'
+                "
+              >
+
+                {{ reviewFeedbackMessage }}
+
+              </p>
+
+            }
+
+
+            <button
+              type="submit"
+              class="btn btn--primary"
+              [disabled]="isSubmittingReview"
+            >
+
+              @if (isSubmittingReview) {
+
+                Submitting...
+
+              } @else {
+
+                Submit Review
+
+              }
+
+            </button>
+
+          </form>
+
+        }
+
+      </section>
+
+    }
+
+  </div>
+
+</section>

@@ -1,0 +1,71 @@
+<div class="modal" style="display:flex;">
+  <div class="modal__overlay" (click)="close()"></div>
+  <div class="modal__panel modal__panel--form" role="dialog" aria-modal="true">
+    <div class="modal__head">
+      <p class="modal__title">Subcategories · {{ category.name }}</p>
+      <button type="button" class="modal__close" (click)="close()" aria-label="Close">×</button>
+    </div>
+    <div class="modal__body">
+
+      @if (!category.subcategories.length) {
+        <p class="cell-muted" style="margin-bottom: var(--space-4);">No subcategories yet.</p>
+      } @else {
+        <div style="display:flex; flex-direction:column; gap: var(--space-2); margin-bottom: var(--space-4);">
+          @for (sub of category.subcategories; track sub._id) {
+            <div style="display:flex; align-items:center; gap: var(--space-3); padding: var(--space-2) 0; border-bottom: 1px solid var(--color-gray);">
+              <span style="flex:1;">{{ sub.name }}</span>
+              <button
+                type="button"
+                class="toggle-pill"
+                [class.toggle-pill--on]="sub.isActive"
+                [disabled]="isBusy(sub._id)"
+                (click)="toggleSubcategoryStatus(sub)"
+              >
+                {{ sub.isActive ? 'Active' : 'Inactive' }}
+              </button>
+              <button type="button" class="row-actions__btn" aria-label="Edit" (click)="openEditModal(sub)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14.5 4.5 19.5 9.5 8 21H3v-5L14.5 4.5Z"/></svg>
+              </button>
+              <button type="button" class="row-actions__btn row-actions__btn--danger" aria-label="Delete" (click)="openDeleteModal(sub)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-8 0 1 12.5A1.5 1.5 0 0 0 9.5 21h5a1.5 1.5 0 0 0 1.5-1.5L17 7"/></svg>
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+      <button type="button" class="btn btn--primary btn--sm" (click)="openAddModal()">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        Add subcategory
+      </button>
+
+    </div>
+    <div class="modal__actions">
+      <button type="button" class="btn btn--secondary btn--sm" (click)="close()">Done</button>
+    </div>
+  </div>
+</div>
+
+@if (isAddModalOpen) {
+  <app-add-subcategory
+    [categoryId]="category._id"
+    (closed)="isAddModalOpen = false"
+    (added)="onSubcategoryAdded($event)"
+  ></app-add-subcategory>
+}
+
+@if (subcategoryBeingEdited) {
+  <app-edit-subcategory
+    [subcategory]="subcategoryBeingEdited"
+    (closed)="subcategoryBeingEdited = null"
+    (edited)="onSubcategoryEdited($event)"
+  ></app-edit-subcategory>
+}
+
+@if (subcategoryPendingDelete) {
+  <app-delete-subcategory
+    [subcategory]="subcategoryPendingDelete"
+    (closed)="subcategoryPendingDelete = null"
+    (deleted)="onSubcategoryDeleted()"
+  ></app-delete-subcategory>
+}

@@ -1,0 +1,327 @@
+/* ============================================================
+   ORDER CARD
+============================================================ */
+
+.order-card {
+  border: 1px solid var(--color-gray);
+
+  border-radius: var(--radius-lg);
+
+  padding:
+    var(--space-5)
+    var(--space-6);
+}
+
+
+/* =========================
+   TOP
+========================= */
+
+.order-card__top {
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content: space-between;
+
+  gap: var(--space-4);
+
+  padding-bottom: var(--space-4);
+
+  margin-bottom: var(--space-4);
+
+  border-bottom:
+    1px solid
+    var(--color-gray);
+}
+
+
+.order-card__id {
+  margin: 0;
+
+  font-weight:
+    var(--fw-semibold);
+
+  color:
+    var(--color-ink);
+}
+
+
+.order-card__date {
+  margin-top: 0.15rem;
+
+  font-size:
+    var(--fs-small);
+
+  color:
+    var(--color-ink-faint);
+}
+
+
+/* =========================
+   STATUS
+========================= */
+
+.status-badge {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: var(--space-2);
+
+  font-size:
+    var(--fs-caption);
+
+  font-weight:
+    var(--fw-semibold);
+
+  padding:
+    0.35rem 0.75rem;
+
+  border-radius:
+    var(--radius-pill);
+
+  white-space: nowrap;
+}
+
+
+.status-badge::before {
+  content: "";
+
+  width: 6px;
+
+  height: 6px;
+
+  border-radius:
+    var(--radius-pill);
+
+  background:
+    currentColor;
+
+  flex-shrink: 0;
+}
+
+
+.status-badge--pending {
+  background:
+    rgba(209, 168, 92, 0.16);
+
+  color:
+    color-mix(in srgb, var(--color-warning) 70%, black);
+}
+
+
+.status-badge--in-progress {
+  background:
+    var(--color-primary-tint);
+
+  color:
+    var(--color-primary-dark);
+}
+
+
+.status-badge--shipped {
+  background:
+    var(--color-primary-tint);
+
+  color:
+    color-mix(in srgb, var(--color-primary-dark) 75%, black);
+}
+
+
+.status-badge--delivered {
+  background:
+    rgba(126, 168, 138, 0.16);
+
+  color:
+    var(--color-success);
+}
+
+
+.status-badge--cancelled {
+  background:
+    var(--color-gray);
+
+  color:
+    var(--color-ink-soft);
+}
+
+
+.status-badge--rejected {
+  background:
+    rgba(201, 122, 109, 0.16);
+
+  color:
+    var(--color-danger);
+}
+
+
+.status-badge--refunded {
+  background:
+    var(--color-muted-blue);
+
+  color:
+    var(--color-ink);
+}
+
+
+/* =========================
+   BODY
+========================= */
+
+.order-card__body {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: var(--space-4);
+}
+
+
+/* =========================
+   THUMBNAILS
+========================= */
+
+.order-card__thumbs {
+  display: flex;
+
+  gap: var(--space-2);
+}
+
+
+.order-card__thumb {
+  width: 56px;
+
+  height: 72px;
+
+  overflow: hidden;
+
+  border-radius:
+    var(--radius-sm);
+
+  background:
+    var(--color-beige-tint);
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  color:
+    var(--color-ink);
+
+  flex-shrink: 0;
+}
+
+
+.order-card__thumb img {
+  width: 100%;
+
+  height: 100%;
+
+  object-fit: cover;
+
+  display: block;
+}
+
+
+.order-card__thumb svg {
+  width: 60%;
+
+  height: 60%;
+
+  opacity: 0.85;
+}
+
+
+.order-card__thumb--more {
+  font-size:
+    var(--fs-small);
+
+  font-weight:
+    var(--fw-semibold);
+
+  color:
+    var(--color-ink-soft);
+}
+
+
+/* =========================
+   META
+========================= */
+
+.order-card__meta {
+  text-align: right;
+}
+
+
+.order-card__meta p:first-child {
+  font-size:
+    var(--fs-small);
+
+  color:
+    var(--color-ink-faint);
+
+  margin-bottom:
+    var(--space-1);
+}
+
+
+.order-card__total {
+  font-weight:
+    var(--fw-semibold);
+
+  color:
+    var(--color-ink);
+
+  font-size:
+    var(--fs-body-lg);
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+.order-card__footer {
+  margin-top:
+    var(--space-5);
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 560px) {
+
+  .order-card {
+    padding:
+      var(--space-4);
+  }
+
+
+  .order-card__top {
+    flex-direction: column;
+
+    align-items: flex-start;
+  }
+
+
+  .order-card__body {
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: var(--space-4);
+  }
+
+
+  .order-card__meta {
+    text-align: left;
+  }
+
+}

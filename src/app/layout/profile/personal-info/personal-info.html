@@ -1,0 +1,180 @@
+<section class="profile-section" id="personal-information">
+
+  <div class="profile-section__head">
+    <h2 class="profile-section__title">
+      Personal Information
+    </h2>
+
+    <p class="profile-section__hint">
+      Update your personal details.
+    </p>
+  </div>
+
+  <div *ngIf="isLoading" class="profile-loading">
+    Loading your information...
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+
+    <div *ngIf="errorMessage" class="message message--error">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="successMessage" class="message message--success">
+      {{ successMessage }}
+    </div>
+
+    <form
+      class="profile-form"
+      (ngSubmit)="saveChanges()"
+    >
+
+      <!-- Full Name -->
+
+      <div class="field">
+        <label class="field__label" for="profile-name">
+          Full name
+        </label>
+
+        <input
+          id="profile-name"
+          class="field__input"
+          type="text"
+          name="name"
+          [(ngModel)]="form.name"
+          autocomplete="name"
+        />
+      </div>
+
+
+      <!-- Email -->
+
+      <div class="field">
+
+        <label class="field__label" for="profile-email">
+          Email
+        </label>
+
+        <input
+          id="profile-email"
+          class="field__input"
+          type="email"
+          name="email"
+          [(ngModel)]="form.email"
+          disabled
+        />
+
+        <span class="field__hint">
+          Email cannot be changed.
+        </span>
+
+      </div>
+
+
+      <!-- Phone -->
+
+      <div class="field">
+
+        <label class="field__label" for="profile-phone">
+          Phone
+          <span class="field__hint">(optional)</span>
+        </label>
+
+        <input
+          id="profile-phone"
+          class="field__input"
+          type="tel"
+          name="phone"
+          [(ngModel)]="form.phone"
+          placeholder="+20 1xx xxx xxxx"
+          autocomplete="tel"
+        />
+
+      </div>
+
+
+      <!-- Date of Birth -->
+
+      <div class="field">
+
+        <label class="field__label" for="profile-dob">
+          Date of birth
+          <span class="field__hint">(optional)</span>
+        </label>
+
+        <input
+          id="profile-dob"
+          class="field__input"
+          type="date"
+          name="DOB"
+          [(ngModel)]="form.DOB"
+        />
+
+      </div>
+
+
+      <!-- Gender -->
+
+      <div class="field">
+
+        <span class="field__label">
+          Gender
+        </span>
+
+        <div class="gender-options">
+
+          <label class="radio-option">
+
+            <input
+              type="radio"
+              name="gender"
+              value="Male"
+              [(ngModel)]="form.gender"
+            />
+
+            <span class="radio-option__circle"></span>
+
+            <span>Male</span>
+
+          </label>
+
+
+          <label class="radio-option">
+
+            <input
+              type="radio"
+              name="gender"
+              value="Female"
+              [(ngModel)]="form.gender"
+            />
+
+            <span class="radio-option__circle"></span>
+
+            <span>Female</span>
+
+          </label>
+
+        </div>
+
+      </div>
+
+
+      <!-- Save -->
+
+      <div class="profile-form__actions">
+
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="isSaving"
+        >
+          {{ isSaving ? 'Saving...' : 'Save Changes' }}
+        </button>
+
+      </div>
+
+    </form>
+
+  </ng-container>
+
+</section>

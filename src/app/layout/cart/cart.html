@@ -1,0 +1,494 @@
+<section class="cart">
+
+  <div class="container">
+
+
+<!-- HEADER -->
+
+<div class="cart-head">
+
+  <nav
+    class="breadcrumb"
+    aria-label="Breadcrumb"
+  >
+
+    <a routerLink="/">
+      Home
+    </a>
+
+    <span>/</span>
+
+    <span class="breadcrumb__current">
+      Cart
+    </span>
+
+  </nav>
+
+
+  <h1>
+    Your Cart
+  </h1>
+
+</div>
+
+
+<!-- GUEST NOTICE -->
+
+@if (!isLoggedIn) {
+
+  <div class="guest-notice">
+
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+    >
+
+      <circle
+        cx="12"
+        cy="8"
+        r="3.5"
+      />
+
+      <path
+        d="M4.5 20c1.6-3.6 4.5-5.5 7.5-5.5s5.9 1.9 7.5 5.5"
+      />
+
+    </svg>
+
+
+    <p>
+
+      You're shopping as a guest —
+      this cart is saved on this device.
+
+      <a routerLink="/login">
+        Log in
+      </a>
+
+      to keep it synced everywhere.
+
+    </p>
+
+  </div>
+
+}
+
+
+<!-- LOADING -->
+
+@if (isLoading) {
+
+  <div class="empty-state">
+
+    <p>
+      Loading your cart...
+    </p>
+
+  </div>
+
+}
+
+
+<!-- ERROR -->
+
+@else if (errorMessage) {
+
+  <div class="empty-state">
+
+    <h3>
+      Something went wrong
+    </h3>
+
+    <p>
+      {{ errorMessage }}
+    </p>
+
+    <button
+      type="button"
+      class="btn btn--primary"
+      (click)="getCart()"
+    >
+      Try Again
+    </button>
+
+  </div>
+
+}
+
+
+<!-- EMPTY CART -->
+
+@else if (
+  !cart ||
+  cart.products.length === 0
+) {
+
+  <div class="empty-state">
+
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.4"
+    >
+
+      <path
+        d="M6 8h12l-1 12H7L6 8Z"
+      />
+
+      <path
+        d="M9 8V6a3 3 0 0 1 6 0v2"
+      />
+
+    </svg>
+
+
+    <h3>
+      Your cart is empty
+    </h3>
+
+
+    <p>
+      Discover something you'll love.
+    </p>
+
+
+    <a
+      routerLink="/products"
+      class="btn btn--primary"
+    >
+      Continue Shopping
+    </a>
+
+  </div>
+
+}
+
+
+<!-- CART -->
+
+@else {
+
+  <div class="cart-layout">
+
+
+    <!--CART ITEMS -->
+
+    <section
+      class="cart-items"
+      aria-label="Items in your cart"
+    >
+
+
+      @for (
+        item of cart.products;
+        track item.productId._id
+      ) {
+
+        <article class="cart-item">
+
+
+          <!-- PRODUCT IMAGE -->
+
+          <a
+            class="cart-item__media"
+            [routerLink]="[
+              '/products',
+              item.productId.slug
+            ]"
+          >
+
+            @if (
+              item.productId.images.length > 0
+            ) {
+
+              <img
+                [src]="item.productId.images[0].secure_url"
+                [alt]="item.productId.name"
+              />
+
+            }
+
+            @else {
+
+              <div class="cart-item__placeholder">
+                No Image
+              </div>
+
+            }
+
+          </a>
+
+
+          <!-- PRODUCT INFO -->
+
+          <div class="cart-item__body">
+
+            <p class="cart-item__category">
+              Product
+            </p>
+
+
+            <a
+              class="cart-item__title"
+              [routerLink]="[
+                '/products',
+                item.productId.slug
+              ]"
+            >
+
+              {{ item.productId.name }}
+
+            </a>
+
+
+            <p class="cart-item__variant">
+
+              @if (item.productId.stock <= 3) {
+                Only {{ item.productId.stock }} left
+              } @else {
+                Available
+              }
+
+            </p>
+
+
+            <button
+              type="button"
+              class="cart-item__remove"
+              [disabled]="
+                removingProductId ===
+                item.productId._id
+              "
+              (click)="
+                removeItem(item.productId._id)
+              "
+            >
+
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+              >
+
+                <path
+                  d="M6 6l12 12M18 6L6 18"
+                />
+
+              </svg>
+
+
+              @if (
+                removingProductId ===
+                item.productId._id
+              ) {
+
+                Removing...
+
+              }
+
+              @else {
+
+                Remove
+
+              }
+
+            </button>
+
+          </div>
+
+
+          <!-- QUANTITY -->
+
+          <div class="qty-select cart-item__qty">
+
+            <button
+              type="button"
+              aria-label="Decrease quantity"
+              [disabled]="
+                item.quantity <= 1 ||
+                updatingProductId ===
+                item.productId._id
+              "
+              (click)="
+                decreaseQuantity(item)
+              "
+            >
+              −
+            </button>
+
+
+            <span>
+              {{ item.quantity }}
+            </span>
+
+
+            <button
+              type="button"
+              aria-label="Increase quantity"
+              [disabled]="
+                item.quantity >=
+                item.productId.stock ||
+                updatingProductId ===
+                item.productId._id
+              "
+              (click)="
+                increaseQuantity(item)
+              "
+            >
+              +
+            </button>
+
+          </div>
+
+
+          <!-- PRICE -->
+
+          <p class="cart-item__price">
+
+            {{ item.price * item.quantity | number:'1.2-2' }} EGP
+
+          </p>
+
+        </article>
+
+      }
+
+
+      <!-- CONTINUE SHOPPING -->
+
+      <a
+        routerLink="/products"
+        class="cart-continue"
+      >
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+        >
+
+          <path
+            d="M15 5l-7 7 7 7"
+          />
+
+        </svg>
+
+        Continue shopping
+
+      </a>
+
+    </section>
+
+
+    <!-- SUMMARY -->
+
+    <aside class="cart-summary">
+
+      <h2 class="cart-summary__title">
+        Order Summary
+      </h2>
+
+
+      <!-- SUBTOTAL -->
+
+      <div class="cart-summary__row">
+
+        <span>
+          Subtotal · {{ getItemsCount() }} items
+        </span>
+
+        <span>
+          {{ getSubtotal() | number:'1.2-2' }} EGP
+        </span>
+
+      </div>
+
+
+      <!-- SHIPPING -->
+
+      <div class="cart-summary__row">
+
+        <span>
+          Shipping
+        </span>
+
+        <span>
+          Calculated at checkout
+        </span>
+
+      </div>
+
+
+      <!-- TOTAL -->
+
+      <div
+        class="cart-summary__row
+               cart-summary__row--total"
+      >
+
+        <span>
+          Total
+        </span>
+
+        <span>
+           {{ getTotal() | number:'1.2-2' }} EGP
+        </span>
+
+      </div>
+
+
+      <!-- CHECKOUT -->
+
+      <a
+        routerLink="/checkout"
+        class="btn btn--primary cart-summary__cta"
+      >
+        Proceed to Checkout
+      </a>
+
+
+      <p class="cart-summary__note">
+
+        Taxes and shipping are calculated
+        at checkout.
+
+      </p>
+
+
+      <!-- CLEAR -->
+
+      <button
+        type="button"
+        class="cart-summary__clear"
+        [disabled]="isClearing"
+        (click)="clearCart()"
+      >
+
+        @if (isClearing) {
+
+          Clearing...
+
+        }
+
+        @else {
+
+          Clear cart
+
+        }
+
+      </button>
+
+    </aside>
+
+  </div>
+
+}
+
+  </div>
+
+</section>

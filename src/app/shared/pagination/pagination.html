@@ -1,0 +1,31 @@
+@if (totalPages > 1) {
+  <div class="pagination">
+
+    <button
+      type="button"
+      class="pagination-arrow"
+      [disabled]="currentPage === 1"
+      (click)="previousPage()">
+      ‹
+    </button>
+
+    @for (page of pages; track page) {
+      <button
+        type="button"
+        class="pagination-number"
+        [class.active]="page === currentPage"
+        (click)="goToPage(page)">
+        {{ page }}
+      </button>
+    }
+
+    <button
+      type="button"
+      class="pagination-arrow"
+      [disabled]="currentPage === totalPages"
+      (click)="nextPage()">
+      ›
+    </button>
+
+  </div>
+}

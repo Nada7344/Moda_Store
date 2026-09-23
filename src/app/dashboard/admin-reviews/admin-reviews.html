@@ -1,0 +1,204 @@
+<div class="page-head">
+  <div>
+    <p class="eyebrow page-head__eyebrow">Sales</p>
+    <h1>Reviews</h1>
+    <p class="page-head__sub">Approve or decline the reviews customers have submitted.</p>
+  </div>
+</div>
+
+<section class="panel">
+  <div class="filters-bar">
+    <label class="filters-bar__search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input
+        type="search"
+        placeholder="Search by product, customer or message…"
+        aria-label="Search reviews"
+        [(ngModel)]="searchTerm"
+      />
+    </label>
+
+    <select
+      class="field__select"
+      aria-label="Status"
+      [ngModel]="statusFilter"
+      (ngModelChange)="onStatusFilterChange($event)"
+    >
+      <option value="">All statuses</option>
+      @for (status of statuses; track status) {
+        <option [value]="status">{{ status }}</option>
+      }
+    </select>
+  </div>
+
+  @if (errorMessage) {
+
+    <p class="panel__body" style="color: var(--color-danger);">{{ errorMessage }}</p>
+
+  } @else if (isLoading) {
+
+    <p class="panel__body">Loading reviews…</p>
+
+  } @else if (!visibleReviews.length) {
+
+    <div class="table-empty">No reviews match these filters.</div>
+
+  } @else {
+
+    <div class="table-wrap">
+      <table class="table table--admin">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Customer</th>
+            <th>Rating</th>
+            <th>Review</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (review of visibleReviews; track review._id) {
+            <tr>
+              <td>
+                <div class="cell-entity">
+                  <span class="cell-entity__thumb">
+                    @if (productImage(review)) {
+                      <img [src]="productImage(review)" [alt]="productName(review)" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" />
+                    } @else {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+                    }
+                  </span>
+                  <div><p class="cell-entity__name">{{ productName(review) }}</p></div>
+                </div>
+              </td>
+              <td>
+                <p class="cell-strong">{{ customerName(review) }}</p>
+                @if (customerEmail(review)) {
+                  <p class="cell-muted">{{ customerEmail(review) }}</p>
+                }
+              </td>
+              <td><app-rating [value]="review.rate"></app-rating></td>
+              <td class="cell-muted" style="max-width: 260px;">
+                <span style="display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">{{ review.message }}</span>
+              </td>
+              <td class="cell-muted">{{ review.createdAt | date:'MMM d, y' }}</td>
+              <td><app-status-badge [status]="review.status" type="review"></app-status-badge></td>
+              <td>
+                <div class="row-actions">
+                  <button
+                    type="button"
+                    class="row-actions__btn"
+                    aria-label="View review"
+                    (click)="openReview(review)"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2.5 12S6 5 12 5s9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7Z"/><circle cx="12" cy="12" r="2.6"/></svg>
+                  </button>
+
+                  @if (isPending(review)) {
+                    <button
+                      type="button"
+                      class="row-actions__btn"
+                      aria-label="Approve review"
+                      [disabled]="busyReviewId === review._id"
+                      (click)="approveReview(review)"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12.5l5 5L20 7"/></svg>
+                    </button>
+                    <button
+                      type="button"
+                      class="row-actions__btn row-actions__btn--danger"
+                      aria-label="Decline review"
+                      [disabled]="busyReviewId === review._id"
+                      (click)="declineReview(review)"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel__foot">
+      <p class="panel__foot-note">Showing {{ rangeStart }}–{{ rangeEnd }} of {{ docsCount }} reviews</p>
+
+      @if (pages > 1) {
+        <nav class="pagination" aria-label="Pagination">
+          <a
+            class="pagination__item pagination__item--nav"
+            [class.pagination__item--disabled]="page === 1"
+            (click)="goToPage(page - 1)"
+          >Prev</a>
+
+          @for (p of pageNumbers; track p) {
+            <a
+              class="pagination__item"
+              [class.pagination__item--active]="p === page"
+              (click)="goToPage(p)"
+            >{{ p }}</a>
+          }
+
+          <a
+            class="pagination__item pagination__item--nav"
+            [class.pagination__item--disabled]="page === pages"
+            (click)="goToPage(page + 1)"
+          >Next</a>
+        </nav>
+      }
+    </div>
+
+  }
+</section>
+
+
+@if (reviewInFocus) {
+  <div class="modal" style="display:flex;">
+    <div class="modal__overlay" (click)="closeReview()"></div>
+    <div class="modal__panel" role="dialog" aria-modal="true">
+      <div class="modal__head">
+        <p class="modal__title">{{ productName(reviewInFocus) }}</p>
+        <button type="button" class="modal__close" (click)="closeReview()" aria-label="Close">×</button>
+      </div>
+      <div class="modal__body">
+
+        @if (actionErrorMessage) {
+          <p style="color: var(--color-danger); font-size: var(--fs-small); margin-bottom: var(--space-3);">{{ actionErrorMessage }}</p>
+        }
+
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: var(--space-3);">
+          <div>
+            <p class="cell-strong">{{ customerName(reviewInFocus) }}</p>
+            @if (customerEmail(reviewInFocus)) {
+              <p class="cell-muted">{{ customerEmail(reviewInFocus) }}</p>
+            }
+          </div>
+          <app-status-badge [status]="reviewInFocus.status" type="review"></app-status-badge>
+        </div>
+
+        <app-rating [value]="reviewInFocus.rate"></app-rating>
+
+        <p class="cell-muted" style="margin-top: var(--space-3); white-space: pre-wrap;">{{ reviewInFocus.message }}</p>
+
+        <p class="cell-muted" style="margin-top: var(--space-3); font-size: var(--fs-caption);">Submitted {{ reviewInFocus.createdAt | date:'MMM d, y, h:mm a' }}</p>
+
+      </div>
+      <div class="modal__actions">
+        @if (isPending(reviewInFocus)) {
+          <button type="button" class="btn btn--ghost" [disabled]="busyReviewId === reviewInFocus._id" (click)="declineReview(reviewInFocus)">
+            {{ busyReviewId === reviewInFocus._id ? 'Working…' : 'Decline' }}
+          </button>
+          <button type="button" class="btn btn--primary" [disabled]="busyReviewId === reviewInFocus._id" (click)="approveReview(reviewInFocus)">
+            {{ busyReviewId === reviewInFocus._id ? 'Working…' : 'Approve' }}
+          </button>
+        } @else {
+          <button type="button" class="btn btn--ghost" (click)="closeReview()">Close</button>
+        }
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,331 @@
+<section class="hero">
+
+  <div class="container hero__inner">
+
+    <div class="hero__content">
+
+      <h1 class="hero__headline">
+       Style made<br />
+        for  <em>you</em> .
+      </h1>
+
+      <p class="hero__sub">
+        Discover our latest collection of stylish and comfortable pieces for every day.
+        Find your favorite looks, made to fit your style and your lifestyle.
+      </p>
+
+      <div class="hero__ctas">
+
+        <a routerLink="/products" [queryParams]="getCategoryParams('women')" class="btn btn--primary">
+          Shop Women
+        </a>
+
+        <a routerLink="/products" [queryParams]="getCategoryParams('men')" class="btn btn--secondary">
+          Shop Men
+        </a>
+
+      </div>
+
+    </div>
+
+
+    <!-- Hero Visual -->
+    <div class="hero__panel" aria-hidden="true">
+
+
+
+      <div class="hero__caption">
+
+        <p>
+          New Arrivals
+        </p>
+
+        <p>
+          Fresh styles, new colors, and everyday essentials you'll love.
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!--  VALUE STRIP  -->
+
+<div class="container">
+
+  <div class="value-strip">
+
+    <p class="value-strip__item">
+      <strong>Free shipping</strong>
+      on orders over 1200 EGP
+    </p>
+
+    <p class="value-strip__item">
+      <strong>Easy returns</strong>
+      within 14 days
+    </p>
+
+    <p class="value-strip__item">
+      <strong>Quality First</strong>
+      — Stylish pieces selected with care.
+    </p>
+
+  </div>
+
+</div>
+
+
+<!--  CATEGORIES  -->
+
+<section class="section categories">
+
+  <div class="container">
+
+    <div class="categories__grid">
+
+      <!-- Women -->
+      <a routerLink="/products" [queryParams]="getCategoryParams('women')" class="category-panel category-panel--women">
+
+        <div class="category-panel__label">
+
+          <h3>
+            Women
+          </h3>
+
+          <span class="category-panel__arrow">
+
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M5 19 19 5M9 5h10v10" />
+            </svg>
+
+          </span>
+
+        </div>
+
+      </a>
+
+
+      <!-- Men -->
+      <a routerLink="/products" [queryParams]="getCategoryParams('men')" class="category-panel category-panel--men">
+
+        <div class="category-panel__label">
+
+          <h3>
+            Men
+          </h3>
+
+          <span class="category-panel__arrow">
+
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M5 19 19 5M9 5h10v10" />
+            </svg>
+
+          </span>
+
+        </div>
+
+      </a>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!--  NEW ARRIVALS  -->
+
+<section class="section new-arrivals">
+
+  <div class="container">
+
+    <div class="section__head">
+
+      <div>
+
+        <h2>
+          New Arrivals
+        </h2>
+
+        <p>
+          Discover our latest styles, selected for you.
+        </p>
+
+      </div>
+
+      <a routerLink="/products" [queryParams]="{ newArrival: true }" class="btn btn--ghost">
+        View all
+      </a>
+
+    </div>
+
+
+    <div class="product-grid">
+
+      @for (product of products; track product._id) {
+
+      <app-product-card [product]="product" badgeMode="newArrival" />
+
+      }
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!--  EDITORIAL  -->
+
+<section class="editorial">
+
+  <div class="container">
+
+    <div class="editorial__inner">
+
+      <p class="h2">
+       “Style made for everyday life, with pieces you’ll want to wear again and again.”
+
+      </p>
+
+      <cite>
+        Moda Store
+      </cite>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!--  TOP SALES  -->
+
+<section class="section top-sales">
+
+  <div class="container">
+
+    <div class="section__head">
+
+      <div>
+
+        <h2>
+          Top Sales
+        </h2>
+
+        <p>
+          The pieces our customers keep coming back for.
+        </p>
+
+      </div>
+
+      <a routerLink="/products" [queryParams]="{ topSales: true }" class="btn btn--ghost">
+        View all
+      </a>
+
+    </div>
+
+
+    <div class="product-grid">
+
+      @for (product of topSales; track product._id) {
+
+      <app-product-card [product]="product" badgeMode="topSales" />
+
+      }
+
+    </div>
+
+  </div>
+
+
+
+</section>
+
+
+<!--  REVIEWS  -->
+
+@if (featuredReviews.length) {
+
+<section class="section reviews">
+
+  <div class="container"  >
+
+    <div class="section__head">
+
+      <div>
+
+        <h2>
+          What customers are saying
+        </h2>
+
+        <p>
+          Reviews from customers.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="reviews__carousel">
+
+      @if (featuredReviews.length > reviewsPerView) {
+
+        <button
+          type="button"
+          class="reviews__arrow reviews__arrow--prev"
+          aria-label="Show previous reviews"
+          [disabled]="!canScrollReviewsPrev"
+          (click)="scrollReviews(-1)"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M15 5 8 12l7 7" />
+          </svg>
+        </button>
+
+      }
+
+      <div
+        class="reviews__track"
+        #reviewsTrack
+        (scroll)="onReviewsScroll()"
+      >
+
+        @for (review of featuredReviews; track review._id) {
+
+        <div class="reviews__item">
+          <app-review [review]="review" />
+        </div>
+
+        }
+
+      </div>
+
+      @if (featuredReviews.length > reviewsPerView) {
+
+        <button
+          type="button"
+          class="reviews__arrow reviews__arrow--next"
+          aria-label="Show more reviews"
+          [disabled]="!canScrollReviewsNext"
+          (click)="scrollReviews(1)"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+
+      }
+
+    </div>
+
+  </div>
+
+</section>
+
+}

@@ -1,0 +1,271 @@
+<div class="page-head">
+  <div>
+    <p class="eyebrow page-head__eyebrow">Overview</p>
+    <h1>{{ greeting }}, {{ adminFirstName }}</h1>
+    <p class="page-head__sub">
+      Here's what's happening across the store today, {{ today | date:'MMMM d' }}.
+    </p>
+  </div>
+
+  <div class="page-head__actions">
+    <select
+      class="field__select"
+      aria-label="Date range"
+      [ngModel]="rangeDays"
+      (ngModelChange)="onRangeChange($event)"
+    >
+      <option [ngValue]="7">Last 7 days</option>
+      <option [ngValue]="30">Last 30 days</option>
+      <option [ngValue]="90">Last 90 days</option>
+    </select>
+
+    <a routerLink="/admin/products/new" class="btn btn--primary btn--sm">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      New product
+    </a>
+  </div>
+</div>
+
+@if (hasPendingAlerts) {
+
+  <div class="panel dashboard-alert">
+    <p class="panel__body dashboard-alert__body">
+
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.29 3.86l-8.18 14.18A1.5 1.5 0 0 0 3.36 20.5h17.28a1.5 1.5 0 0 0 1.25-2.46L13.71 3.86a1.5 1.5 0 0 0-2.42 0Z"/></svg>
+
+      @if (pendingOrdersCount > 0 && pendingReviewsCount > 0) {
+
+        You have
+        <a [routerLink]="['/admin/orders']" [queryParams]="{ status: 'Pending' }">{{ pendingOrdersCount }} new order{{ pendingOrdersCount === 1 ? '' : 's' }}</a>
+        and
+        <a [routerLink]="['/admin/reviews']" [queryParams]="{ status: 'Pending' }">{{ pendingReviewsCount }} new review{{ pendingReviewsCount === 1 ? '' : 's' }}</a>
+        waiting for you to check.
+
+      } @else if (pendingOrdersCount > 0) {
+
+        You have
+        <a [routerLink]="['/admin/orders']" [queryParams]="{ status: 'Pending' }">{{ pendingOrdersCount }} new order{{ pendingOrdersCount === 1 ? '' : 's' }}</a>
+        waiting for you to check.
+
+      } @else {
+
+        You have
+        <a [routerLink]="['/admin/reviews']" [queryParams]="{ status: 'Pending' }">{{ pendingReviewsCount }} new review{{ pendingReviewsCount === 1 ? '' : 's' }}</a>
+        waiting for you to check.
+
+      }
+
+    </p>
+  </div>
+
+}
+
+@if (errorMessage) {
+
+  <div class="panel">
+    <p class="panel__body" style="padding-top: var(--space-5); color: var(--color-danger);">
+      {{ errorMessage }}
+    </p>
+  </div>
+
+} @else if (isLoading) {
+
+  <p class="page-head__sub">Loading dashboard…</p>
+
+} @else {
+
+
+  <div class="stat-grid">
+
+    <div class="stat-card">
+      <div class="stat-card__top">
+        <span class="stat-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16M4 6l1.2 12.2A2 2 0 0 0 7.2 20h9.6a2 2 0 0 0 2-1.8L20 6M9 10v5M15 10v5M8.5 6l1-2.5h5l1 2.5"/></svg>
+        </span>
+        @if (salesDelta) {
+          <span class="stat-card__delta" [class.stat-card__delta--up]="salesDelta.direction === 'up'" [class.stat-card__delta--down]="salesDelta.direction === 'down'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              @if (salesDelta.direction === 'up') { <path d="M6 15l6-6 6 6"/> } @else { <path d="M6 9l6 6 6-6"/> }
+            </svg>
+            {{ salesDelta.percent | number:'1.1-1' }}%
+          </span>
+        }
+      </div>
+      <p class="stat-card__value">EGP {{ (overview?.totalRevenue || 0) | number:'1.0-0' }}</p>
+      <p class="stat-card__label">Total sales ({{ rangeDays }} days)</p>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-card__top">
+        <span class="stat-card__icon stat-card__icon--warning">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+        </span>
+        @if (pendingOrdersDelta) {
+          <span class="stat-card__delta" [class.stat-card__delta--up]="pendingOrdersDelta.direction === 'up'" [class.stat-card__delta--down]="pendingOrdersDelta.direction === 'down'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              @if (pendingOrdersDelta.direction === 'up') { <path d="M6 15l6-6 6 6"/> } @else { <path d="M6 9l6 6 6-6"/> }
+            </svg>
+            {{ pendingOrdersDelta.percent | number:'1.1-1' }}%
+          </span>
+        }
+      </div>
+      <p class="stat-card__value">{{ overview?.ordersByStatus?.['Pending'] || 0 }}</p>
+      <p class="stat-card__label">Pending orders</p>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-card__top">
+        <span class="stat-card__icon stat-card__icon--success">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5h12v17l-3-2-3 2-3-2-3 2v-17Z"/><path d="M9 8h6M9 12h6"/></svg>
+        </span>
+        @if (ordersDelta) {
+          <span class="stat-card__delta" [class.stat-card__delta--up]="ordersDelta.direction === 'up'" [class.stat-card__delta--down]="ordersDelta.direction === 'down'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              @if (ordersDelta.direction === 'up') { <path d="M6 15l6-6 6 6"/> } @else { <path d="M6 9l6 6 6-6"/> }
+            </svg>
+            {{ ordersDelta.percent | number:'1.1-1' }}%
+          </span>
+        }
+      </div>
+      <p class="stat-card__value">{{ overview?.totalOrders || 0 }}</p>
+      <p class="stat-card__label">Orders ({{ rangeDays }} days)</p>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-card__top">
+        <span class="stat-card__icon stat-card__icon--beige">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c1.3-3.4 3.4-5 6-5s4.7 1.6 6 5"/><circle cx="17.5" cy="8.5" r="2.4"/><path d="M15.8 12.2c2 .2 3.5 1.6 4.5 3.9"/></svg>
+        </span>
+        @if (newSignupsDelta) {
+          <span class="stat-card__delta" [class.stat-card__delta--up]="newSignupsDelta.direction === 'up'" [class.stat-card__delta--down]="newSignupsDelta.direction === 'down'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              @if (newSignupsDelta.direction === 'up') { <path d="M6 15l6-6 6 6"/> } @else { <path d="M6 9l6 6 6-6"/> }
+            </svg>
+            {{ newSignupsDelta.percent | number:'1.1-1' }}%
+          </span>
+        }
+      </div>
+      <p class="stat-card__value">{{ newSignups }}</p>
+      <p class="stat-card__label">New signups ({{ rangeDays }} days)</p>
+    </div>
+
+  </div>
+
+  <div class="content-grid">
+
+    <section class="panel">
+      <div class="panel__head">
+        <div>
+          <p class="panel__title">Sales over time</p>
+          <p class="panel__sub">FR-47 · Weekly totals for the selected range</p>
+        </div>
+      </div>
+      <div class="panel__body">
+        @if (salesSeries.length) {
+          <div class="bar-chart" role="img" aria-label="Weekly sales bar chart">
+            @for (point of salesSeries; track point.period) {
+              <div class="bar-chart__col">
+                <div
+                  class="bar-chart__bar"
+                  [class.bar-chart__bar--peak]="isPeakBar(point)"
+                  [style.height.%]="barHeight(point)"
+                ></div>
+                <span class="bar-chart__label">{{ point.period }}</span>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="page-head__sub">No sales in this period yet.</p>
+        }
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel__head">
+        <div>
+          <p class="panel__title">Orders by status</p>
+          <p class="panel__sub">FR-45 · Current snapshot</p>
+        </div>
+      </div>
+      <div class="panel__body">
+        <div class="activity-list">
+          @for (group of statusGroups; track group.label) {
+            <div class="activity-item">
+              <app-status-badge [status]="group.badgeStatus" type="order"></app-status-badge>
+              <span class="cell-strong" style="margin-left:auto">{{ statusGroupCount(group.keys) }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="content-grid">
+
+    <section class="panel">
+      <div class="panel__head">
+        <div>
+          <p class="panel__title">Recent orders</p>
+          <p class="panel__sub">Latest activity across the store</p>
+        </div>
+        <a routerLink="/admin/orders" class="btn btn--ghost btn--sm">View all</a>
+      </div>
+
+      @if (recentOrders.length) {
+        <div class="table-wrap">
+          <table class="table table--admin">
+            <thead>
+              <tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              @for (order of recentOrders; track order._id) {
+                <tr>
+                  <td>
+                    <a [routerLink]="['/admin/orders', order._id]" class="cell-strong">{{ orderCode(order._id) }}</a>
+                    <div class="cell-muted">{{ order.createdAt | date:'MMM d, y' }}</div>
+                  </td>
+                  <td>{{ customerName(order) }}</td>
+                  <td class="cell-strong">EGP {{ order.totalPrice | number:'1.0-0' }}</td>
+                  <td><app-status-badge [status]="order.status" type="order"></app-status-badge></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <div class="table-empty">No orders yet.</div>
+      }
+    </section>
+
+    <section class="panel">
+      <div class="panel__head">
+        <div>
+          <p class="panel__title">Top products</p>
+          <p class="panel__sub">FR-50 · Best sellers this range</p>
+        </div>
+      </div>
+      <div class="panel__body">
+        @if (topProducts.length) {
+          <div class="activity-list">
+            @for (product of topProducts; track product.productId) {
+              <div class="activity-item">
+                <span class="activity-item__dot">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3.5 8 12 3.5 20.5 8 12 12.5 3.5 8Z"/></svg>
+                </span>
+                <div>
+                  <p class="activity-item__text"><strong>{{ product.name }}</strong></p>
+                  <p class="activity-item__time">{{ product.quantitySold }} units sold · EGP {{ product.revenue | number:'1.0-0' }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="page-head__sub">No sales in this period yet.</p>
+        }
+      </div>
+    </section>
+
+  </div>
+
+}

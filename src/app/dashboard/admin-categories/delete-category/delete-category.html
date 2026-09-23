@@ -1,0 +1,10 @@
+<app-confirm-dialog
+  title="Delete category?"
+  [message]="'This will deactivate ' + category.name + '. It cannot be deleted while it still has active subcategories or products.'"
+  confirmLabel="Delete category"
+  busyLabel="Deleting…"
+  [isBusy]="isDeleting"
+  [errorMessage]="errorMessage"
+  (cancelled)="cancel()"
+  (confirmed)="confirm()"
+></app-confirm-dialog>

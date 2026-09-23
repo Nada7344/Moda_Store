@@ -1,0 +1,141 @@
+<header class="navbar">
+  <div class="container navbar__inner">
+
+    <!-- Logo -->
+    <a routerLink="/home" class="navbar__logo" aria-label="Moda Store Home">
+            <img src="logo/moda_stor_logo.png" alt="Moda&nbsp;Store" >
+
+    </a>
+
+
+    <!-- Main Navigation -->
+    <nav class="navbar__links" aria-label="Main navigation">
+
+      <a routerLink="/home" routerLinkActive="navbar__link--active" [routerLinkActiveOptions]="{ exact: true }"
+        class="navbar__link">
+        Home
+      </a>
+
+      <a routerLink="/products" routerLinkActive="navbar__link--active" [routerLinkActiveOptions]="{ exact: true }"
+        class="navbar__link">
+        All Products
+      </a>
+
+      <a routerLink="/products" [queryParams]="getCategoryParams('men')" routerLinkActive="navbar__link--active"
+        class="navbar__link">
+        Men
+      </a>
+
+      <a routerLink="/products" [queryParams]="getCategoryParams('women')" routerLinkActive="navbar__link--active"
+        class="navbar__link">
+        Women
+      </a>
+
+    </nav>
+
+
+    <!-- Actions -->
+    <div class="navbar__actions">
+
+      <!-- Search -->
+      <label class="navbar__search">
+
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+
+          <path d="M21 21l-4.3-4.3" />
+        </svg>
+
+        <input type="search" [(ngModel)]="searchTerm" placeholder="Search products" aria-label="Search products"
+          (keyup.enter)="onSearch()" />
+
+      </label>
+
+
+      <!-- Account -->
+   <!-- Account -->
+
+@if ((userData$ | async) === null) {
+
+   <a
+    routerLink="/login"
+    routerLinkActive="navbar__icon-btn--active"
+    class="navbar__icon-btn"
+    aria-label="Account"
+    title="Login"
+  >
+
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="8" r="3.5" />
+
+      <path
+        d="M4.5 20c1.6-3.6 4.5-5.5 7.5-5.5s5.9 1.9 7.5 5.5"
+      />
+    </svg>
+
+  </a>
+
+} @else {
+  <a
+    routerLink="/profile"
+    routerLinkActive="navbar__icon-btn--active"
+    class="navbar__icon-btn"
+    aria-label="My Account"
+    title="My Account"
+  >
+
+
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="8" r="3.5" />
+
+      <path
+        d="M4.5 20c1.6-3.6 4.5-5.5 7.5-5.5s5.9 1.9 7.5 5.5"
+      />
+    </svg>
+
+  </a>
+
+}
+
+      <!-- Cart -->
+      <a routerLink="/cart" routerLinkActive="navbar__icon-btn--active" class="navbar__icon-btn"
+        aria-label="Shopping cart">
+
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <path d="M6 8h12l-1 12H7L6 8Z" />
+
+          <path d="M9 8V6a3 3 0 0 1 6 0v2" />
+        </svg>
+
+        <span class="navbar__cart-count">
+          {{ (cartCount$ | async) ?? 0 }}
+        </span>
+
+      </a>
+
+
+      <!-- Mobile Menu -->
+      <button type="button" class="navbar__menu-btn" aria-label="Open menu">
+
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+
+      </button>
+
+    </div>
+
+  </div>
+</header>

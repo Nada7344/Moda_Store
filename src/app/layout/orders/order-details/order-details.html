@@ -1,0 +1,418 @@
+<section class="order-details page-shell">
+
+  <div class="container">
+
+    <!--BREADCRUMB -->
+
+    <nav
+      class="breadcrumb"
+      aria-label="Breadcrumb"
+    >
+      <a routerLink="/home">
+        Home
+      </a>
+
+      <span>/</span>
+
+      <a routerLink="/orders">
+        Orders
+      </a>
+
+      <span>/</span>
+
+      @if (order) {
+        <span class="breadcrumb__current">
+          Order {{ formattedOrderId }}
+        </span>
+      } @else {
+        <span class="breadcrumb__current">
+          Order Details
+        </span>
+      }
+    </nav>
+
+
+    <!--LOADING -->
+
+    @if (loading) {
+
+      <div class="order-details__state">
+
+        <p>
+          Loading order details...
+        </p>
+
+      </div>
+
+    }
+
+
+    <!-- ERROR -->
+
+    @else if (!order) {
+
+      <div class="order-details__state">
+
+        <h1>
+          Order not found
+        </h1>
+
+        <p>
+          {{ errorMessage }}
+        </p>
+
+        <a
+          routerLink="/orders"
+          class="btn btn--primary"
+        >
+          Back to Orders
+        </a>
+
+      </div>
+
+    }
+
+
+    <!-- ORDER -->
+
+    @else {
+
+      <header class="order-details__head">
+
+        <div>
+
+          <p class="eyebrow">
+            Order Details
+          </p>
+
+          <h1>
+            Order {{ formattedOrderId }}
+          </h1>
+
+          <p class="order-details__date">
+            Placed on
+            {{ order.orderedAt | date:'MMMM d, y' }}
+          </p>
+
+        </div>
+
+
+        <div
+          class="order-status"
+          [class]="getStatusClass(order.status)"
+        >
+          {{ order.status }}
+        </div>
+
+      </header>
+
+
+      <!-- MESSAGES -->
+
+      @if (successMessage) {
+
+        <div class="state-message state-message--success">
+          {{ successMessage }}
+        </div>
+
+      }
+
+      @if (errorMessage) {
+
+        <div class="state-message state-message--error">
+          {{ errorMessage }}
+        </div>
+
+      }
+
+
+      <!--ORDER CONTENT -->
+
+      <div class="order-details__layout">
+
+
+        <!-- PRODUCTS -->
+
+        <section class="order-details__products">
+
+          <div class="section-head">
+
+            <h2>
+              Items
+            </h2>
+
+            <span>
+              {{ order.products.length }}
+              {{ order.products.length === 1 ? 'item' : 'items' }}
+            </span>
+
+          </div>
+
+
+          <div class="order-items">
+
+            @for (
+              item of order.products;
+              track $index
+            ) {
+
+              <article class="order-item">
+
+
+                <!-- IMAGE -->
+
+                <div class="order-item__image">
+
+                  @if (getProductImage(item)) {
+
+                    <img
+                      [src]="getProductImage(item)"
+                      [alt]="getProductName(item)"
+                    >
+
+                  } @else {
+
+                    <div class="order-item__placeholder">
+                      No Image
+                    </div>
+
+                  }
+
+                </div>
+
+
+                <!-- INFO -->
+
+                <div class="order-item__info">
+
+                  @if (getProductSlug(item)) {
+
+                    <a
+                      [routerLink]="[
+                        '/products',
+                        getProductSlug(item)
+                      ]"
+                      class="order-item__name"
+                    >
+                      {{ getProductName(item) }}
+                    </a>
+
+                  } @else {
+
+                    <h3 class="order-item__name">
+                      {{ getProductName(item) }}
+                    </h3>
+
+                  }
+
+
+                  <p class="order-item__quantity">
+                    Quantity:
+                    {{ item.quantity }}
+                  </p>
+
+                </div>
+
+
+                <!-- PRICE -->
+
+                <div class="order-item__price">
+
+                  <span>
+                     {{ item.price | number:'1.2-2' }} EGP
+                  </span>
+
+                  <small>
+                    {{ getProductTotal(item) | number:'1.2-2' }} EGP
+                  </small>
+
+                </div>
+
+              </article>
+
+            }
+
+          </div>
+
+        </section>
+
+
+        <!-- SUMMARY -->
+
+        <aside class="order-summary">
+
+          <h2>
+            Order Summary
+          </h2>
+
+
+          <div class="order-summary__row">
+
+            <span>
+              Items
+            </span>
+
+            <span>
+              {{ order.products.length }}
+            </span>
+
+          </div>
+
+
+          <div class="order-summary__row">
+
+            <span>
+              Total
+            </span>
+
+            <strong>
+              {{ order.totalPrice | number:'1.2-2' }} EGP
+            </strong>
+
+          </div>
+
+
+          <div class="order-summary__divider"></div>
+
+
+          <div class="order-summary__status">
+
+            <span>
+              Status
+            </span>
+
+            <strong>
+              {{ order.status }}
+            </strong>
+
+          </div>
+
+
+          <!-- CANCEL -->
+
+          @if (canCancelOrder()) {
+
+            <button
+              type="button"
+              class="btn btn--danger order-summary__cancel"
+              [disabled]="isCancelling"
+              (click)="cancelOrder()"
+            >
+
+              @if (isCancelling) {
+
+                Cancelling...
+
+              } @else {
+
+                Cancel Order
+
+              }
+
+            </button>
+
+          }
+
+
+          <a
+            routerLink="/orders"
+            class="btn btn--secondary order-summary__back"
+          >
+            Back to Orders
+          </a>
+
+        </aside>
+
+      </div>
+
+
+      <!-- SHIPPING ADDRESS -->
+
+      @if (order.address) {
+
+        <section class="order-address">
+
+          <div class="section-head">
+
+            <h2>
+              Shipping Address
+            </h2>
+
+          </div>
+
+
+          <div class="order-address__card">
+
+            @if (order.address.label) {
+
+              <span class="order-address__label">
+                {{ order.address.label }}
+              </span>
+
+            }
+
+
+            <p>
+              {{ order.address.street }}
+            </p>
+
+
+            @if (order.address.building) {
+
+              <p>
+                Building {{ order.address.building }}
+              </p>
+
+            }
+
+
+            @if (order.address.apartment) {
+
+              <p>
+                Apartment {{ order.address.apartment }}
+              </p>
+
+            }
+
+
+            <p>
+              {{ order.address.city }}
+
+              @if (order.address.state) {
+                , {{ order.address.state }}
+              }
+            </p>
+
+
+            @if (order.address.country) {
+
+              <p>
+                {{ order.address.country }}
+
+                @if (order.address.postalCode) {
+                  , {{ order.address.postalCode }}
+                }
+              </p>
+
+            }
+
+
+            @if (order.address.phone) {
+
+              <p>
+                {{ order.address.phone }}
+              </p>
+
+            }
+
+          </div>
+
+        </section>
+
+      }
+
+    }
+
+  </div>
+
+</section>

@@ -1,0 +1,239 @@
+<section class="products-page">
+
+  <div class="products-header">
+
+    <div>
+      <h1>
+        @if (newArrival) {
+          New Arrivals
+        } @else if (topSales) {
+          Top Sales
+        } @else {
+          Products
+        }
+      </h1>
+      <p>{{ totalProducts }} products</p>
+    </div>
+
+    <div class="sort-box">
+
+      <label for="sort">Sort By</label>
+
+      <select
+        id="sort"
+        [(ngModel)]="selectedSort"
+        (change)="onSortChange()"
+      >
+        <option value="newest">Newest</option>
+        <option value="priceAsc">Price: Low to High</option>
+        <option value="priceDesc">Price: High to Low</option>
+        <option value="rating">Rating</option>
+      </select>
+
+    </div>
+
+  </div>
+
+  <div class="products-content">
+
+    <aside class="filters">
+
+      <div class="filter-header">
+
+        <h2>Filters</h2>
+
+        <button
+          type="button"
+          (click)="clearFilters()"
+        >
+          Clear All
+        </button>
+
+      </div>
+
+      <div class="filter-group">
+
+        <label for="search">Search</label>
+
+        <div class="search-box">
+
+          <input
+            id="search"
+            type="text"
+            [(ngModel)]="search"
+            (keyup.enter)="onSearch()"
+            placeholder="Search products"
+          >
+
+          <button
+            type="button"
+            (click)="onSearch()"
+          >
+            Search
+          </button>
+
+        </div>
+
+      </div>
+
+      <div class="filter-group">
+
+        <label for="category">Category</label>
+
+        <select
+          id="category"
+          [(ngModel)]="selectedCategory"
+          (change)="onCategoryChange()"
+        >
+
+          <option value="">All Categories</option>
+
+          @for (category of categories; track category._id) {
+
+            <option [value]="category._id">
+              {{ category.name }}
+            </option>
+
+          }
+
+        </select>
+
+      </div>
+
+      @if (subcategories.length > 0) {
+
+        <div class="filter-group">
+
+          <label for="subcategory">Subcategory</label>
+
+          <select
+            id="subcategory"
+            [(ngModel)]="selectedSubcategory"
+            (change)="onSubcategoryChange()"
+          >
+
+            <option value="">All Subcategories</option>
+
+            @for (subcategory of subcategories; track subcategory._id) {
+
+              <option [value]="subcategory._id">
+                {{ subcategory.name }}
+              </option>
+
+            }
+
+          </select>
+
+        </div>
+
+      }
+
+      <div class="filter-group">
+
+        <label>Price</label>
+
+        <div class="price-inputs">
+
+          <input
+            type="number"
+            [(ngModel)]="minPrice"
+            min="0"
+            placeholder="Min"
+            (change)="onPriceChange()"
+          >
+
+          <span>-</span>
+
+          <input
+            type="number"
+            [(ngModel)]="maxPrice"
+            min="0"
+            placeholder="Max"
+            (change)="onPriceChange()"
+          >
+
+        </div>
+
+      </div>
+
+      <div class="filter-group checkbox-group">
+
+        <label>
+
+          <input
+            type="checkbox"
+            [(ngModel)]="inStock"
+            (change)="onStockChange()"
+          >
+
+          <span>In Stock Only</span>
+
+        </label>
+
+      </div>
+
+    </aside>
+
+    <main class="products-area">
+
+      @if (isLoading) {
+
+        <div class="loading">
+          <p>Loading products...</p>
+        </div>
+
+      } @else if (products.length === 0) {
+
+        <div class="empty-products">
+
+          <h2>No Products Found</h2>
+
+          <p>
+            Try changing your filters or search.
+          </p>
+
+          <button
+            type="button"
+            (click)="clearFilters()"
+          >
+            Clear Filters
+          </button>
+
+        </div>
+
+      } @else {
+
+        <div class="products-grid">
+
+          @for (product of products; track product._id) {
+
+            <app-product-card
+              [product]="product"
+              badgeMode="none"
+            />
+
+          }
+
+        </div>
+
+        @if (totalPages > 1) {
+
+          <div class="pagination-wrapper">
+
+            <app-pagination
+              [currentPage]="currentPage"
+              [totalPages]="totalPages"
+              (pageChange)="onPageChange($event)"
+            />
+
+          </div>
+
+        }
+
+      }
+
+    </main>
+
+  </div>
+
+</section>

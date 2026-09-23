@@ -1,0 +1,85 @@
+/* ============================================================
+   MODAL — reusable confirmation dialog, CSS-only (no JS)
+   Structure:
+     <input type="checkbox" id="x-modal" class="modal-toggle" />
+     <label for="x-modal" class="btn ...">Open label</label>
+     <div class="modal">
+       <label for="x-modal" class="modal__overlay" aria-hidden="true"></label>
+       <div class="modal__panel" role="dialog" aria-modal="true">
+         <div class="modal__head">…<label for="x-modal" class="modal__close">×</label></div>
+         <div class="modal__body">…</div>
+         <div class="modal__actions">…</div>
+       </div>
+     </div>
+   ============================================================ */
+
+.modal-toggle { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-toggle:checked ~ .modal {
+  display: flex;
+}
+
+.modal__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(38, 49, 58, 0.45);
+  backdrop-filter: blur(2px);
+  cursor: pointer;
+}
+
+.modal__panel {
+  position: relative;
+  width: min(420px, calc(100vw - 2.5rem));
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-6);
+  animation: modal-in var(--duration-base) var(--ease-standard);
+}
+
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+.modal__title { font-size: var(--fs-h3); }
+.modal__close {
+  flex-shrink: 0;
+  width: 28px; height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  color: var(--color-ink-faint);
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.modal__close:hover { background: var(--color-beige-tint); color: var(--color-ink); }
+
+.modal__body { font-size: var(--fs-small); color: var(--color-ink-soft); line-height: var(--lh-body); margin-bottom: var(--space-6); }
+
+/* ---- Form variant (address add/edit — wider to fit a two-column form-grid) ---- */
+.modal__panel--form { width: min(560px, calc(100vw - 2.5rem)); }
+
+.modal__actions { display: flex; justify-content: flex-end; gap: var(--space-3); }
+.modal__actions .btn { padding: 0.75rem 1.5rem; }
+
+.btn--danger { background: var(--color-danger); color: var(--color-white); }
+.btn--danger:hover { background: #a75d51; }

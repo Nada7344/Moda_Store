@@ -1,0 +1,7 @@
+/* Pagination items are anchors without href (click-driven) — restore pointer cursor */
+.pagination__item {
+  cursor: pointer;
+}
+.pagination__item--disabled {
+  cursor: not-allowed;
+}

@@ -1,0 +1,754 @@
+<main class="checkout">
+
+  <div class="container">
+
+    <!--LOADING -->
+
+    @if (isLoading) {
+
+      <div class="checkout-loading">
+
+        <p>
+          Loading checkout...
+        </p>
+
+      </div>
+
+    }
+
+    @else {
+
+      <!--  HEAD -->
+
+      <div class="checkout-head">
+
+        <nav
+          class="breadcrumb"
+          aria-label="Breadcrumb"
+        >
+
+          <a routerLink="/">
+            Home
+          </a>
+
+          <span aria-hidden="true">
+            /
+          </span>
+
+          <a routerLink="/cart">
+            Cart
+          </a>
+
+          <span aria-hidden="true">
+            /
+          </span>
+
+          <span class="breadcrumb__current">
+            Checkout
+          </span>
+
+        </nav>
+
+
+        <h1>
+          Checkout
+        </h1>
+
+
+        <!-- CHECKOUT STEP -->
+
+        <ol
+          class="checkout-steps"
+          aria-label="Checkout progress"
+        >
+
+          <li
+            class="checkout-steps__item is-done"
+          >
+            Cart
+          </li>
+
+          <li
+            class="checkout-steps__item is-current"
+          >
+            Shipping
+          </li>
+
+          <li
+            class="checkout-steps__item"
+          >
+            Confirmation
+          </li>
+
+        </ol>
+
+      </div>
+
+
+      <!--ERR -->
+
+      @if (errorMessage) {
+
+        <div class="checkout-message checkout-message--error">
+
+          {{ errorMessage }}
+
+        </div>
+
+      }
+
+
+      <!-- SUCCE -->
+
+      @if (successMessage) {
+
+        <div class="checkout-message checkout-message--success">
+
+          {{ successMessage }}
+
+        </div>
+
+      }
+
+
+      <!-- CHECKOUT LAYO -->
+
+      <form
+        class="checkout-layout"
+        (ngSubmit)="placeOrder()"
+      >
+
+        <!-- SHIPPING ADDRES -->
+
+        <section
+          class="checkout-section"
+          aria-labelledby="shipping-heading"
+        >
+
+          <h2
+            id="shipping-heading"
+            class="checkout-section__title"
+          >
+            Shipping Address
+          </h2>
+
+
+          <p class="checkout-section__hint">
+
+            Choose a saved address or enter a new
+            one for this order.
+
+          </p>
+
+
+          <!--  SAVED ADDRESSES -->
+
+          @if (addresses.length > 0) {
+
+            <div class="address-grid">
+
+              @for (
+                address of addresses;
+                track address._id
+              ) {
+
+                <label
+                  class="address-card"
+                  [class.address-card--selected]="
+                    selectedAddressId === address._id &&
+                    !isAddingNewAddress
+                  "
+                >
+
+                  <input
+                    type="radio"
+                    name="address"
+                    [value]="address._id"
+                    [checked]="
+                      selectedAddressId === address._id &&
+                      !isAddingNewAddress
+                    "
+                    (change)="selectAddress(address._id)"
+                  />
+
+
+                  <div class="address-card__top">
+
+                    <span class="address-card__label">
+
+                      {{ address.label | titlecase }}
+
+                    </span>
+
+
+                    @if (address.isDefault) {
+
+                      <span class="address-card__default">
+
+                        Default
+
+                      </span>
+
+                    }
+
+                  </div>
+
+
+                  <p class="address-card__lines">
+
+                    {{ address.street }}
+
+                    @if (address.building) {
+                      , Building {{ address.building }}
+                    }
+
+                    @if (address.apartment) {
+                      , Apt {{ address.apartment }}
+                    }
+
+                    <br />
+
+                    {{ address.city }}
+
+                    @if (address.state) {
+                      , {{ address.state }}
+                    }
+
+                    , {{ address.country }}
+
+                  </p>
+
+
+                  @if (address.phone) {
+
+                    <p class="address-card__phone">
+
+                      {{ address.phone }}
+
+                    </p>
+
+                  }
+
+                </label>
+
+              }
+
+
+              <!-- ADD NEW -->
+
+              <button
+                type="button"
+                class="address-card address-card--add"
+                (click)="showNewAddress()"
+              >
+
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  aria-hidden="true"
+                >
+
+                  <path
+                    d="M12 5v14M5 12h14"
+                  />
+
+                </svg>
+
+
+                <span>
+                  Add new address
+                </span>
+
+              </button>
+
+            </div>
+
+          }
+
+          @else {
+
+            <!-- NO SAVED ADDRESS -->
+
+            <button
+              type="button"
+              class="address-card address-card--add"
+              (click)="showNewAddress()"
+            >
+
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                aria-hidden="true"
+              >
+
+                <path
+                  d="M12 5v14M5 12h14"
+                />
+
+              </svg>
+
+              <span>
+                Add new address
+              </span>
+
+            </button>
+
+          }
+
+
+          <!--  NEW ADDRESS FORM -->
+
+          @if (isAddingNewAddress) {
+
+            <div class="new-address-form">
+
+              <div class="new-address-form__head">
+
+                <h3 class="new-address-form__title">
+
+                  New Address
+
+                </h3>
+
+
+                @if (addresses.length > 0) {
+
+                  <button
+                    type="button"
+                    class="new-address-form__cancel"
+                    (click)="hideNewAddress()"
+                  >
+                    Cancel
+                  </button>
+
+                }
+
+              </div>
+
+
+              <div class="form-grid">
+
+                <!-- STREET -->
+
+                <div class="field">
+
+                  <label
+                    class="field__label"
+                    for="addr-street"
+                  >
+                    Street
+                  </label>
+
+                  <input
+                    class="field__input"
+                    type="text"
+                    id="addr-street"
+                    name="street"
+                    [(ngModel)]="newAddress.street"
+                    placeholder="Street name and number"
+                  />
+
+                </div>
+
+
+                <!-- CITY -->
+
+                <div class="field">
+
+                  <label
+                    class="field__label"
+                    for="addr-city"
+                  >
+                    City
+                  </label>
+
+                  <input
+                    class="field__input"
+                    type="text"
+                    id="addr-city"
+                    name="city"
+                    [(ngModel)]="newAddress.city"
+                    placeholder="City"
+                  />
+
+                </div>
+
+
+                <!-- BUILDING -->
+
+                <div class="field">
+
+                  <label
+                    class="field__label"
+                    for="addr-building"
+                  >
+
+                    Building
+
+                    <span class="field__hint">
+                      (optional)
+                    </span>
+
+                  </label>
+
+                  <input
+                    class="field__input"
+                    type="text"
+                    id="addr-building"
+                    name="building"
+                    [(ngModel)]="newAddress.building"
+                    placeholder="Building"
+                  />
+
+                </div>
+
+
+                <!-- APARTMENT -->
+
+                <div class="field">
+
+                  <label
+                    class="field__label"
+                    for="addr-apartment"
+                  >
+
+                    Apartment
+
+                    <span class="field__hint">
+                      (optional)
+                    </span>
+
+                  </label>
+
+                  <input
+                    class="field__input"
+                    type="text"
+                    id="addr-apartment"
+                    name="apartment"
+                    [(ngModel)]="newAddress.apartment"
+                    placeholder="Apartment"
+                  />
+
+                </div>
+
+
+                <!-- LABEL -->
+
+                <div class="field">
+
+                  <label
+                    class="field__label"
+                    for="addr-label"
+                  >
+                    Label
+                  </label>
+
+                  <select
+                    class="field__select"
+                    id="addr-label"
+                    name="label"
+                    [(ngModel)]="newAddress.label"
+                  >
+
+                    <option value="Home">
+                      Home
+                    </option>
+
+                    <option value="Work">
+                      Work
+                    </option>
+
+                    <option value="Other">
+                      Other
+                    </option>
+
+                  </select>
+
+                </div>
+
+
+                <!-- PHONE -->
+
+                <div class="field">
+
+                  <label
+                    class="field__label"
+                    for="addr-phone"
+                  >
+
+                    Phone
+
+                    <span class="field__hint">
+                      (optional)
+                    </span>
+
+                  </label>
+
+                  <input
+                    class="field__input"
+                    type="tel"
+                    id="addr-phone"
+                    name="phone"
+                    [(ngModel)]="newAddress.phone"
+                    placeholder="+20 1xx xxx xxxx"
+                  />
+
+                </div>
+
+              </div>
+
+
+              <!-- SAVE ADDRESS -->
+
+              <label
+                class="check"
+                style="margin-top: var(--space-4);"
+              >
+
+                <input
+                  type="checkbox"
+                  name="saveNewAddress"
+                  [(ngModel)]="saveNewAddress"
+                />
+
+                <span class="check__box"></span>
+
+                Save this address to my account
+
+              </label>
+
+
+              <!-- SAVE ADDRESS BUTTON -->
+
+              <button
+                type="button"
+                class="btn btn--secondary new-address-form__save"
+                [disabled]="isSubmitting"
+                (click)="addAddress()"
+              >
+
+                @if (isSubmitting && saveNewAddress) {
+
+                  Saving...
+
+                }
+                @else {
+
+                  Save Address
+
+                }
+
+              </button>
+
+            </div>
+
+          }
+
+        </section>
+
+
+        <!-- ORDER SUMMAR -->
+
+        <aside class="checkout-summary">
+
+          <h2 class="checkout-summary__title">
+
+            Order Summary
+
+          </h2>
+
+
+          <!--ITEMS -->
+
+          @if (cart) {
+
+            <div class="checkout-summary__items">
+
+              @for (
+                item of cart.products;
+                track item.productId._id
+              ) {
+
+                <div class="checkout-summary__item">
+
+                  <span
+                    class="checkout-summary__item-media"
+                    aria-hidden="true"
+                  >
+
+                    @if (
+                      item.productId.images.length
+                    ) {
+
+                      <img
+                        [src]="item.productId.images[0].secure_url"
+                        [alt]="item.productId.name"
+                      />
+
+                    }
+                    @else {
+
+                      <svg
+                        viewBox="0 0 100 130"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.6"
+                      >
+
+                        <path
+                          d="M30 20 L20 32 L26 42 L34 36 L34 108 L66 108 L66 36 L74 42 L80 32 L70 20 L62 20 C62 26 57 30 50 30 C43 30 38 26 38 20 Z"
+                        />
+
+                      </svg>
+
+                    }
+
+
+                    <span class="checkout-summary__item-qty">
+
+                      {{ item.quantity }}
+
+                    </span>
+
+                  </span>
+
+
+                  <span class="checkout-summary__item-name">
+
+                    {{ item.productId.name }}
+
+                  </span>
+
+
+                  <span class="checkout-summary__item-price">
+
+                     {{ item.price * item.quantity | number:'1.2-2' }} EGP
+
+                  </span>
+
+                </div>
+
+              }
+
+            </div>
+
+
+            <!--SUBTOTAL -->
+
+            <div class="checkout-summary__row">
+
+              <span>
+
+                Subtotal ·
+                {{ getItemsCount() }}
+                {{ getItemsCount() === 1 ? 'item' : 'items' }}
+
+              </span>
+
+              <span>
+
+                {{ getSubtotal() | number:'1.2-2' }} EGP
+
+              </span>
+
+            </div>
+
+
+            <!--SHIPPING -->
+
+            <div class="checkout-summary__row">
+
+              <span>
+                Shipping
+              </span>
+
+
+              @if (isShippingLoading) {
+
+                <span>
+                  Calculating...
+                </span>
+
+              }
+              @else {
+
+                <span>
+                  {{ shipping | number:'1.2-2' }} EGP
+                </span>
+
+              }
+
+            </div>
+
+
+            <!--  TOTAL -->
+
+            <div
+              class="checkout-summary__row checkout-summary__row--total"
+            >
+
+              <span>
+                Total
+              </span>
+
+              <span>
+
+                {{ getTotal() | number:'1.2-2' }} EGP
+
+              </span>
+
+            </div>
+
+
+            <!-- PLACE ORDER-->
+
+            <button
+              type="submit"
+              class="btn btn--primary checkout-summary__cta"
+              [disabled]="
+                isSubmitting ||
+                isShippingLoading ||
+                !cart ||
+                cart.products.length === 0
+              "
+            >
+
+              @if (isSubmitting) {
+
+                Placing Order...
+
+              }
+              @else {
+
+                Place Order
+
+              }
+
+            </button>
+
+
+            <p class="checkout-summary__note">
+
+              By placing your order you agree to our
+
+              <a routerLink="/policies">
+                Terms &amp; Policies
+              </a>.
+
+            </p>
+
+          }
+
+        </aside>
+
+      </form>
+
+    }
+
+  </div>
+
+</main>

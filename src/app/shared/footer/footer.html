@@ -1,0 +1,149 @@
+<footer class="footer">
+
+  <div class="container">
+
+    <div class="footer__inner">
+
+      <!-- Brand -->
+      <div appScrollReveal>
+
+        <p class="footer__brand">
+          Moda Store
+        </p>
+
+        <p class="footer__tagline">
+          Considered clothing for men and women,
+          made to be worn more than once a season.
+        </p>
+
+      </div>
+
+
+      <!-- Shop -->
+      <nav
+        appScrollReveal
+        [appScrollRevealDelay]="100"
+      >
+
+        <p class="footer__heading">
+          Shop
+        </p>
+
+        <div class="footer__list">
+
+          <a
+            routerLink="/products"
+            [queryParams]="{ category: 'women' }"
+            class="footer__link"
+          >
+            Women
+          </a>
+
+          <a
+            routerLink="/products"
+            [queryParams]="{ category: 'men' }"
+            class="footer__link"
+          >
+            Men
+          </a>
+
+          <a
+            routerLink="/products"
+            [queryParams]="{ sort: 'newest' }"
+            class="footer__link"
+          >
+            New Arrivals
+          </a>
+
+        </div>
+
+      </nav>
+
+
+      <!-- Customer Service -->
+      <nav
+        appScrollReveal
+        [appScrollRevealDelay]="200"
+      >
+
+        <p class="footer__heading">
+          Customer Service
+        </p>
+
+        <div class="footer__list">
+
+
+
+
+          <a
+            routerLink="/contact"
+            class="footer__link"
+          >
+            Contact
+          </a>
+
+          <a
+            routerLink="/orders"
+            class="footer__link"
+          >
+            Track an Order
+          </a>
+
+        </div>
+
+      </nav>
+
+
+      <!-- About -->
+      <nav
+        appScrollReveal
+        [appScrollRevealDelay]="300"
+      >
+
+        <p class="footer__heading">
+          About
+        </p>
+
+        <div class="footer__list">
+
+          <a
+            routerLink="/about"
+            class="footer__link"
+          >
+            Our Story
+          </a>
+
+          <a
+            routerLink="/policies"
+            class="footer__link"
+          >
+            Policies
+          </a>
+
+        </div>
+
+      </nav>
+
+    </div>
+
+
+    <!-- Footer Bottom -->
+    <div
+      class="footer__bottom"
+      appScrollReveal
+      [appScrollRevealDelay]="350"
+    >
+
+      <p>
+        © 2026 Moda Store. All rights reserved.
+      </p>
+
+      <p>
+        Made with care.
+      </p>
+
+    </div>
+
+  </div>
+
+</footer>

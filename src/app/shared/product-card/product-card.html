@@ -1,0 +1,109 @@
+<article
+  class="product-card"
+  [class.product-card--out-of-stock]="product.isOutOfStock"
+>
+
+  <a
+    [routerLink]="['/products', product.slug]"
+    class="product-card__media"
+  >
+
+    @if ((showNewBadge || showTopSaleBadge) && !product.isOutOfStock) {
+      <div class="product-card__badges">
+
+        @if (showNewBadge) {
+          <span class="product-card__badge">
+            New
+          </span>
+        }
+
+        @if (showTopSaleBadge) {
+          <span class="product-card__badge product-card__badge--sale">
+            Top Sale
+          </span>
+        }
+
+      </div>
+    }
+
+
+
+    @if (product.images.length) {
+
+      <img
+        [src]="product.images[0].secure_url"
+        [alt]="product.name"
+      />
+
+    } @else {
+
+      <svg
+        viewBox="0 0 100 120"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M50 8 40 16 24 22 16 38 24 44 32 38 32 108 68 108 68 38 76 44 84 38 76 22 60 16Z"/>
+        <path d="M50 8v100"/>
+      </svg>
+
+    }
+
+    @if (product.isOutOfStock) {
+
+      <span class="product-card__oos-label">
+        Out of Stock
+      </span>
+
+    } @else {
+
+      <div class="product-card__quick-add">
+        <button
+          type="button"
+          class="btn btn--sm"
+          [disabled]="isAddingToCart"
+          (click)="addToCart($event)"
+        >
+          @if (isAddingToCart) {
+            Adding...
+          } @else if (justAdded) {
+            Added ✓
+          } @else {
+            Add to Cart
+          }
+        </button>
+      </div>
+
+    }
+
+  </a>
+
+  <div class="product-card__body">
+
+    <p class="product-card__category">
+      {{ product.category.name }}
+    </p>
+
+    <h3 class="product-card__title">
+      <a [routerLink]="['/products', product.slug]">
+        {{ product.name }}
+      </a>
+    </h3>
+
+    <app-rating
+      [value]="product.ratingsAverage"
+    />
+
+    <div class="product-card__row">
+
+      <span class="product-card__price">
+         {{ product.price }} EGP
+      </span>
+
+    </div>
+
+  </div>
+
+</article>

@@ -1,0 +1,24 @@
+<div class="modal" style="display:flex;">
+  <div class="modal__overlay" (click)="close()"></div>
+  <div class="modal__panel modal__panel--form" role="dialog" aria-modal="true">
+    <div class="modal__head">
+      <p class="modal__title">Edit subcategory</p>
+      <button type="button" class="modal__close" (click)="close()" aria-label="Close">×</button>
+    </div>
+    <div class="modal__body">
+      @if (errorMessage) {
+        <p style="color: var(--color-danger); font-size: var(--fs-small); margin-bottom: var(--space-3);">{{ errorMessage }}</p>
+      }
+      <div class="field">
+        <label class="field__label" for="edit-sub-name">Subcategory name</label>
+        <input class="field__input" id="edit-sub-name" type="text" [(ngModel)]="name" (keyup.enter)="save()" />
+      </div>
+    </div>
+    <div class="modal__actions">
+      <button type="button" class="btn btn--secondary btn--sm" (click)="close()">Cancel</button>
+      <button type="button" class="btn btn--primary btn--sm" [disabled]="isSaving || !name.trim()" (click)="save()">
+        {{ isSaving ? 'Saving…' : 'Save changes' }}
+      </button>
+    </div>
+  </div>
+</div>
