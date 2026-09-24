@@ -1,4 +1,5 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, Inject, OnDestroy, OnInit } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
@@ -29,7 +30,7 @@ import { finalize } from 'rxjs';
   templateUrl: './product-list.html',
   styleUrl: './product-list.css'
 })
-export class ProductList implements OnInit {
+export class ProductList implements OnInit, OnDestroy {
 
   products: IProduct[] = [];
 
@@ -59,12 +60,15 @@ export class ProductList implements OnInit {
 
   isLoading = false;
 
+  filtersOpen = false;
+
   constructor(
     private _productService: ProductService,
     private _categoryService: CategoryService,
     private _route: ActivatedRoute,
     private _router: Router,
-    private _cdr: ChangeDetectorRef
+    private _cdr: ChangeDetectorRef,
+    @Inject(DOCUMENT) private _document: Document
   ) {}
 
   ngOnInit(): void {
@@ -118,6 +122,58 @@ export class ProductList implements OnInit {
 
       this.loadProducts();
     });
+  }
+
+  get activeFiltersCount(): number {
+
+    return [
+      !!this.search,
+      !!this.selectedCategory,
+      !!this.selectedSubcategory,
+      this.minPrice !== null || this.maxPrice !== null,
+      this.inStock
+    ].filter(Boolean).length;
+  }
+
+  openFilters(): void {
+
+    this.setFilters(true);
+  }
+
+  closeFilters(): void {
+
+    this.setFilters(false);
+  }
+
+  private setFilters(open: boolean): void {
+
+    this.filtersOpen = open;
+
+    // lock page scroll behind the drawer
+    this._document.body.style.overflow =
+      open ? 'hidden' : '';
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+
+    if (this.filtersOpen) {
+      this.closeFilters();
+    }
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+
+    // the drawer is mobile-only; release it when the window grows to desktop width
+    if (this.filtersOpen && window.innerWidth > 768) {
+      this.closeFilters();
+    }
+  }
+
+  ngOnDestroy(): void {
+
+    this._document.body.style.overflow = '';
   }
 
   loadCategories(): void {

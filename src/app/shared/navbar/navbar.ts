@@ -1,11 +1,15 @@
 import {
   ChangeDetectorRef,
   Component,
+  HostListener,
+  Inject,
+  OnDestroy,
   OnInit
 } from '@angular/core';
 
 import {
-  CommonModule
+  CommonModule,
+  DOCUMENT
 } from '@angular/common';
 
 import {
@@ -34,6 +38,14 @@ import {
   CartService
 } from '../../core/services/cart.service';
 
+import {
+  UserService
+} from '../../core/services/user.service';
+
+import {
+  IUser
+} from '../../core/models/user.model';
+
 @Component({
   selector: 'app-navbar',
 
@@ -48,9 +60,13 @@ import {
 
   styleUrl: './navbar.css',
 })
-export class Navbar implements OnInit {
+export class Navbar implements OnInit, OnDestroy {
 
   searchTerm = '';
+
+  isMenuOpen = false;
+
+  profileOpen = false;
 
   userData$;
 
@@ -58,12 +74,16 @@ export class Navbar implements OnInit {
 
   categories: ICategory[] = [];
 
+  currentUser: IUser | null = null;
+
   constructor(
     private _authService: AuthService,
     private _categoryService: CategoryService,
     private _cartService: CartService,
     private _cdr: ChangeDetectorRef,
-    private _router: Router
+    private _router: Router,
+    private _userService: UserService,
+    @Inject(DOCUMENT) private _document: Document
   ) {
 
     this.userData$ =
@@ -104,6 +124,8 @@ export class Navbar implements OnInit {
     this._authService
       .returnUserData()
       .subscribe(user => {
+
+        this.loadCurrentUser(!!user);
 
         this._cartService
           .getCart(!!user)
@@ -165,10 +187,119 @@ export class Navbar implements OnInit {
       return;
     }
 
+    this.closeMenu();
+
     this._router.navigate(
       ['/products'],
       { queryParams: { search: term } }
     );
+  }
+
+  private loadCurrentUser(isLoggedIn: boolean): void {
+
+    if (!isLoggedIn) {
+
+      this.currentUser = null;
+
+      return;
+    }
+
+    this._userService
+      .getProfile()
+      .subscribe({
+
+        next: response => {
+
+          this.currentUser = response.data.user;
+
+          this._cdr.detectChanges();
+        },
+
+        error: () => {
+
+          this.currentUser = null;
+        }
+
+      });
+  }
+
+  get userInitials(): string {
+
+    const name = this.currentUser?.name?.trim();
+
+    if (!name) {
+      return 'M';
+    }
+
+    return name
+      .split(/\s+/)
+      .slice(0, 2)
+      .map(part => part[0])
+      .join('')
+      .toUpperCase();
+  }
+
+  toggleMenu(): void {
+
+    this.setMenu(!this.isMenuOpen);
+  }
+
+  closeMenu(): void {
+
+    this.setMenu(false);
+  }
+
+  get isProfileRoute(): boolean {
+
+    return this._router.url.startsWith('/profile');
+  }
+
+  toggleProfile(): void {
+
+    this.profileOpen = !this.profileOpen;
+  }
+
+  private setMenu(open: boolean): void {
+
+    this.isMenuOpen = open;
+
+    // open the Profile submenu by default when the user is already inside it
+    if (open) {
+      this.profileOpen = this.isProfileRoute;
+    }
+
+    // lock page scroll behind the drawer
+    this._document.body.style.overflow =
+      open ? 'hidden' : '';
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+
+    if (this.isMenuOpen) {
+      this.closeMenu();
+    }
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+
+    // drawer is mobile-only; release it if the window grows to desktop width
+    if (this.isMenuOpen && window.innerWidth > 900) {
+      this.closeMenu();
+    }
+  }
+
+  ngOnDestroy(): void {
+
+    this._document.body.style.overflow = '';
+  }
+
+  onLogout(): void {
+
+    this.closeMenu();
+
+    this.logout();
   }
 
   logout(): void {

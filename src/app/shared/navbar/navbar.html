@@ -9,28 +9,32 @@
 
 
     <!-- Main Navigation -->
-    <nav class="navbar__links" aria-label="Main navigation">
+    <ng-template #navLinksTpl>
 
       <a routerLink="/home" routerLinkActive="navbar__link--active" [routerLinkActiveOptions]="{ exact: true }"
-        class="navbar__link">
+        class="navbar__link" (click)="closeMenu()">
         Home
       </a>
 
       <a routerLink="/products" routerLinkActive="navbar__link--active" [routerLinkActiveOptions]="{ exact: true }"
-        class="navbar__link">
+        class="navbar__link" (click)="closeMenu()">
         All Products
       </a>
 
       <a routerLink="/products" [queryParams]="getCategoryParams('men')" routerLinkActive="navbar__link--active"
-        class="navbar__link">
+        class="navbar__link" (click)="closeMenu()">
         Men
       </a>
 
       <a routerLink="/products" [queryParams]="getCategoryParams('women')" routerLinkActive="navbar__link--active"
-        class="navbar__link">
+        class="navbar__link" (click)="closeMenu()">
         Women
       </a>
 
+    </ng-template>
+
+    <nav class="navbar__links" aria-label="Main navigation">
+      <ng-container *ngTemplateOutlet="navLinksTpl"></ng-container>
     </nav>
 
 
@@ -127,15 +131,168 @@
 
 
       <!-- Mobile Menu -->
-      <button type="button" class="navbar__menu-btn" aria-label="Open menu">
+      <button type="button" class="navbar__menu-btn" [attr.aria-label]="isMenuOpen ? 'Close menu' : 'Open menu'" aria-controls="navbar-drawer"
+        [attr.aria-expanded]="isMenuOpen" (click)="toggleMenu()">
 
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <path d="M4 7h16M4 12h16M4 17h16" />
-        </svg>
+        @if (!isMenuOpen) {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+            <path d="M4 7h16M4 12h16M4 17h16" />
+          </svg>
+        } @else {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+            <path d="M6 6l12 12M18 6 6 18" />
+          </svg>
+        }
 
       </button>
 
     </div>
 
   </div>
+
 </header>
+
+<!-- Mobile Drawer (outside <header>: backdrop-filter would break position:fixed) -->
+<div class="drawer-overlay" [class.drawer-overlay--open]="isMenuOpen" (click)="closeMenu()" aria-hidden="true"></div>
+
+<aside id="navbar-drawer" class="drawer" [class.drawer--open]="isMenuOpen" role="dialog" aria-modal="true"
+  aria-label="Site menu" [attr.aria-hidden]="!isMenuOpen" [attr.inert]="isMenuOpen ? null : ''">
+
+  <div class="drawer__top">
+    <a routerLink="/home" class="drawer__logo" (click)="closeMenu()" aria-label="Moda Store Home">
+      <img src="logo/moda_stor_logo.png" alt="Moda&nbsp;Store" />
+    </a>
+
+    <button type="button" class="drawer__close" (click)="closeMenu()" aria-label="Close menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+        <path d="M6 6l12 12M18 6 6 18" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Profile card -->
+  @if ((userData$ | async) !== null) {
+    <a routerLink="/profile" class="drawer__profile" (click)="closeMenu()">
+      <span class="drawer__avatar" aria-hidden="true">{{ userInitials }}</span>
+      <span class="drawer__profile-text">
+        <strong>{{ currentUser?.name || 'My account' }}</strong>
+        <small>{{ currentUser?.email || 'View profile' }}</small>
+      </span>
+    </a>
+  } @else {
+    <div class="drawer__guest">
+      <p>Welcome to Moda Store</p>
+      <div class="drawer__guest-actions">
+        <a routerLink="/login" class="btn btn--primary" (click)="closeMenu()">Log in</a>
+        <a routerLink="/register" class="btn btn--secondary" (click)="closeMenu()">Sign up</a>
+      </div>
+    </div>
+  }
+
+  <!-- Search -->
+  <label class="navbar__search navbar__search--drawer">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+      <circle cx="11" cy="11" r="7" />
+      <path d="M21 21l-4.3-4.3" />
+    </svg>
+    <input type="search" [(ngModel)]="searchTerm" placeholder="Search products" aria-label="Search products"
+      (keyup.enter)="onSearch()" />
+  </label>
+
+  <!-- Links -->
+  <nav class="drawer__nav" aria-label="Mobile navigation">
+
+    <a routerLink="/home" routerLinkActive="drawer__link--active" [routerLinkActiveOptions]="{ exact: true }"
+      class="drawer__link" (click)="closeMenu()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+        <path d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-8.5Z" />
+      </svg>
+      Home
+    </a>
+
+    <a routerLink="/products" routerLinkActive="drawer__link--active" [routerLinkActiveOptions]="{ exact: true }"
+      class="drawer__link" (click)="closeMenu()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+        <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" />
+      </svg>
+      All Products
+    </a>
+
+    <a routerLink="/products" [queryParams]="getCategoryParams('men')" routerLinkActive="drawer__link--active"
+      class="drawer__link" (click)="closeMenu()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+        <path d="M8 4 3 7l2 4 3-1v10h8V10l3 1 2-4-5-3a4 4 0 0 1-8 0Z" />
+      </svg>
+      Men
+    </a>
+
+    <a routerLink="/products" [queryParams]="getCategoryParams('women')" routerLinkActive="drawer__link--active"
+      class="drawer__link" (click)="closeMenu()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+        <path d="M9 3l1 5-4 13h12L14 8l1-5M10 8h4" />
+      </svg>
+      Women
+    </a>
+
+    <a routerLink="/cart" routerLinkActive="drawer__link--active" class="drawer__link" (click)="closeMenu()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+        <path d="M6 8h12l-1 12H7L6 8Z" />
+        <path d="M9 8V6a3 3 0 0 1 6 0v2" />
+      </svg>
+      Cart
+      <span class="drawer__badge">{{ (cartCount$ | async) ?? 0 }}</span>
+    </a>
+
+    @if ((userData$ | async) !== null) {
+      <a routerLink="/orders" routerLinkActive="drawer__link--active" class="drawer__link" (click)="closeMenu()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3ZM9 8h6M9 12h6" />
+        </svg>
+        My Orders
+      </a>
+
+      <!-- Profile (expandable) -->
+      <button type="button" class="drawer__link drawer__toggle" [class.drawer__link--active]="isProfileRoute"
+        [attr.aria-expanded]="profileOpen" aria-controls="drawer-profile-sub" (click)="toggleProfile()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <circle cx="12" cy="8" r="3.5" />
+          <path d="M4.5 20c1.6-3.6 4.5-5.5 7.5-5.5s5.9 1.9 7.5 5.5" />
+        </svg>
+        Profile
+        <svg class="drawer__chevron" [class.drawer__chevron--open]="profileOpen" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+
+      <div id="drawer-profile-sub" class="drawer__sub" [class.drawer__sub--open]="profileOpen">
+        <div class="drawer__sub-inner">
+
+          <a routerLink="/profile/personal-information" routerLinkActive="drawer__sublink--active"
+            class="drawer__sublink" (click)="closeMenu()">Personal Information</a>
+
+          <a routerLink="/profile/addresses" routerLinkActive="drawer__sublink--active"
+            class="drawer__sublink" (click)="closeMenu()">Addresses</a>
+
+          <a routerLink="/profile/password" routerLinkActive="drawer__sublink--active"
+            class="drawer__sublink" (click)="closeMenu()">Password</a>
+
+          <a routerLink="/profile/orders" routerLinkActive="drawer__sublink--active"
+            class="drawer__sublink" (click)="closeMenu()">Recent Orders</a>
+
+        </div>
+      </div>
+    }
+
+  </nav>
+
+  @if ((userData$ | async) !== null) {
+    <button type="button" class="drawer__link drawer__logout" (click)="onLogout()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+        <path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4M16 8l4 4-4 4M20 12H9" />
+      </svg>
+      Log out
+    </button>
+  }
+
+</aside>

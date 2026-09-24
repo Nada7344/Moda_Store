@@ -5,6 +5,66 @@
     background-size: cover;
   background-position: 100% center;
  }
+
+/* ---- Mobile hero (hidden by default, shown under 640px) ---- */
+.hero--mobile { display: none; }
+
+.hero-mobile__media {
+  position: relative;
+  min-height: 80vh;
+  background-image: url('/banners/mobile_banner.png');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: var(--space-6) var(--space-5) var(--space-8);
+}
+
+.hero-mobile__content {
+  max-width: 65%;
+}
+
+.hero-mobile__badge {
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(38, 49, 58, 0.15);
+  border-radius: var(--radius-pill);
+  padding: var(--space-1) var(--space-4);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+  margin-bottom: var(--space-5);
+}
+
+.hero-mobile__headline {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--fs-display);
+  line-height: 1.05;
+  color: var(--color-ink);
+}
+
+.hero-mobile__headline em {
+  font-style: italic;
+  color: var(--color-primary-dark);
+}
+
+.hero-mobile__sub {
+  margin-top: var(--space-4);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-ink-soft);
+  max-width: 28ch;
+}
+
+.hero-mobile__cta {
+  margin-top: var(--space-6);
+  width: fit-content;
+}
+
 .hero__inner {
   display: grid;
   grid-template-columns: 1.05fr 0.95fr;
@@ -112,13 +172,20 @@
 .value-strip {
   display: flex;
   justify-content: center;
-  gap: var(--space-8);
+  gap: 0;
   padding-block: var(--space-5);
   border-top: 1px solid var(--color-gray);
   border-bottom: 1px solid var(--color-gray);
   flex-wrap: wrap;
 }
-.value-strip__item { font-size: var(--fs-small); color: var(--color-ink-soft); text-align: center; }
+.value-strip__item {
+  padding-inline: var(--space-6);
+  font-size: var(--fs-small);
+  color: var(--color-ink-soft);
+  text-align: center;
+}
+/* full-height vertical divider between items */
+.value-strip__item + .value-strip__item { border-left: 1px solid var(--color-gray); }
 .value-strip__item strong { color: var(--color-ink); font-weight: var(--fw-medium); }
 
 /* ---- Section heading (shared shape within this page) ---- */
@@ -165,8 +232,17 @@
   width: 100%;
   color: var(--color-ink);
 }
-.category-panel__label h3 { font-family: var(--font-display); font-size: var(--fs-h2); font-weight: 400;
- }
+.category-panel__label h3 {
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: 400;
+  line-height: 1.2;
+  padding: 0.25em 0.8em;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
 .category-panel__arrow {
   width: 42px; height: 42px;
   border-radius: var(--radius-pill);
@@ -283,8 +359,36 @@
 }
 
 @media (max-width: 640px) {
-  .categories__grid { grid-template-columns: 1fr; }
-  .value-strip { gap: var(--space-5); }
+  .hero--desktop { display: none; }
+  .hero--mobile { display: block; }
+  .hero { padding-block: 0; }
+  .categories__grid { gap: var(--space-3); }
+  .category-panel { padding: var(--space-2); }
+  .category-panel__label h3 { font-size: 0.85rem; padding: 0.15em 0.6em; }
+  .category-panel__arrow { width: 26px; height: 26px; }
+  .category-panel__arrow svg { width: 11px; height: 11px; }
+  .value-strip { flex-wrap: nowrap; }
+  .value-strip__item { flex: 1; padding-inline: var(--space-2); font-size: var(--fs-caption); }
+  .section { padding-block: var(--space-6); }
+  .section__head { align-items: center; margin-bottom: var(--space-4); gap: var(--space-2); }
+  .section__head h2 { font-size: 1.4rem; }
+  .section__head p { font-size: var(--fs-caption); margin-top: var(--space-1); }
+  .section__head .btn--ghost { flex-shrink: 0; white-space: nowrap; font-size: var(--fs-small); }
+  .product-grid {
+    display: flex;
+    gap: var(--space-4);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: var(--space-2);
+    scrollbar-width: none;
+  }
+  .product-grid::-webkit-scrollbar { display: none; }
+  .product-grid app-product-card {
+    flex: 0 0 auto;
+    width: 62%;
+    scroll-snap-align: start;
+  }
   .reviews__carousel { gap: var(--space-2); }
   .reviews__item { flex-basis: 88%; }
   .footer__inner { grid-template-columns: 1fr; }

@@ -271,17 +271,9 @@
     gap: var(--space-5);
   }
 
+  /* on small screens these links live in the hamburger drawer (Profile submenu) */
   .account-nav {
-    position: static;
-
-    flex-direction: row;
-    flex-wrap: wrap;
-
-    gap: var(--space-1);
-  }
-
-  .account-nav__link {
-    width: auto;
+    display: none;
   }
 
 }

@@ -15,20 +15,40 @@
       <p>{{ totalProducts }} products</p>
     </div>
 
-    <div class="sort-box">
+    <div class="header-actions">
 
-      <label for="sort">Sort By</label>
-
-      <select
-        id="sort"
-        [(ngModel)]="selectedSort"
-        (change)="onSortChange()"
+      <button
+        type="button"
+        class="filter-toggle"
+        (click)="openFilters()"
+        aria-controls="product-filters"
+        [attr.aria-expanded]="filtersOpen"
       >
-        <option value="newest">Newest</option>
-        <option value="priceAsc">Price: Low to High</option>
-        <option value="priceDesc">Price: High to Low</option>
-        <option value="rating">Rating</option>
-      </select>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <path d="M4 7h16M7 12h10M10 17h4" />
+        </svg>
+        Filter
+        @if (activeFiltersCount > 0) {
+          <span class="filter-toggle__count">{{ activeFiltersCount }}</span>
+        }
+      </button>
+
+      <div class="sort-box">
+
+        <label for="sort">Sort By</label>
+
+        <select
+          id="sort"
+          [(ngModel)]="selectedSort"
+          (change)="onSortChange()"
+        >
+          <option value="newest">Newest</option>
+          <option value="priceAsc">Price: Low to High</option>
+          <option value="priceDesc">Price: High to Low</option>
+          <option value="rating">Rating</option>
+        </select>
+
+      </div>
 
     </div>
 
@@ -36,7 +56,19 @@
 
   <div class="products-content">
 
-    <aside class="filters">
+    <div
+      class="filters-overlay"
+      [class.filters-overlay--open]="filtersOpen"
+      (click)="closeFilters()"
+      aria-hidden="true"
+    ></div>
+
+    <aside
+      id="product-filters"
+      class="filters"
+      [class.filters--open]="filtersOpen"
+      aria-label="Filters"
+    >
 
       <div class="filter-header">
 
@@ -49,7 +81,20 @@
           Clear All
         </button>
 
+        <button
+          type="button"
+          class="filters__close"
+          (click)="closeFilters()"
+          aria-label="Close filters"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+            <path d="M6 6l12 12M18 6 6 18" />
+          </svg>
+        </button>
+
       </div>
+
+      <div class="filters__body">
 
       <div class="filter-group">
 
@@ -158,6 +203,8 @@
 
       <div class="filter-group checkbox-group">
 
+        <span class="filter-title">Availability</span>
+
         <label>
 
           <input
@@ -169,6 +216,20 @@
           <span>In Stock Only</span>
 
         </label>
+
+      </div>
+
+      </div>
+
+      <div class="filters__footer">
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="closeFilters()"
+        >
+          Show {{ totalProducts }} {{ totalProducts === 1 ? 'product' : 'products' }}
+        </button>
 
       </div>
 
