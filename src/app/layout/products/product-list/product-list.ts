@@ -262,7 +262,6 @@ export class ProductList implements OnInit, OnDestroy {
 
         next: response => {
 
-          console.log('Products Response:', response);
 
           this.products = response.data.result;
 

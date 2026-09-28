@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -8,6 +8,7 @@ import {
 
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { getErrorMessage } from '../../core/utils/http-error';
 
 @Component({
   selector: 'app-register',
@@ -22,9 +23,9 @@ export class Register {
 
   registerForm: FormGroup;
 
-  isLoading = false;
+  isLoading = signal(false);
 
-  errorMessage = '';
+  errorMessage = signal('');
 
   showPassword = false;
 
@@ -90,19 +91,13 @@ export class Register {
 
   private passwordsMatchValidator(group: FormGroup) {
 
-    const password =
-      group.get('password')?.value;
+    const password = group.get('password')?.value;
 
-    const confirmPassword =
-      group.get('confirmPassword')?.value;
+    const confirmPassword = group.get('confirmPassword')?.value;
 
-    if (
-      confirmPassword &&
-      password !== confirmPassword
-    ) {
+    if (confirmPassword && password !== confirmPassword) {
 
-      group.get('confirmPassword')
-        ?.setErrors({ mismatch: true });
+      group.get('confirmPassword')?.setErrors({ mismatch: true });
 
     }
 
@@ -112,7 +107,7 @@ export class Register {
 
   register(): void {
 
-    this.errorMessage = '';
+    this.errorMessage.set('');
 
     if (this.registerForm.invalid) {
 
@@ -122,7 +117,7 @@ export class Register {
 
     }
 
-    this.isLoading = true;
+    this.isLoading.set(true);
 
     const {
       confirmPassword,
@@ -139,9 +134,9 @@ export class Register {
       .register(payload as any)
       .subscribe({
 
-        next: (res) => {
+        next: () => {
 
-          this.isLoading = false;
+          this.isLoading.set(false);
 
           this._router.navigate(
             ['/verify'],
@@ -152,40 +147,17 @@ export class Register {
 
         error: (err) => {
 
-          this.isLoading = false;
+          this.isLoading.set(false);
 
-          this.handleRegisterError(err);
+          this.errorMessage.set(
+            err?.status === 409
+              ? 'This email is already registered. Try logging in instead.'
+              : getErrorMessage(err)
+          );
 
         }
 
       });
-
-  }
-
-  private handleRegisterError(err: any): void {
-
-    if (err.status === 0) {
-
-      this.errorMessage =
-        'Unable to connect to the server. Please try again.';
-
-      return;
-
-    }
-
-    if (err.status === 409) {
-
-      this.errorMessage =
-        err.error?.message ||
-        'This email is already registered.';
-
-      return;
-
-    }
-
-    this.errorMessage =
-      err.error?.message ||
-      'Something went wrong. Please try again.';
 
   }
 

@@ -1,5 +1,15 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, finalize, tap, throwError } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  catchError,
+  finalize,
+  map,
+  of,
+  shareReplay,
+  tap,
+  throwError
+} from 'rxjs';
 
 import {
   IApiMessageRes,
@@ -15,7 +25,7 @@ import {
 } from '../models/auth.model';
 
 import { jwtDecode } from 'jwt-decode';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { TokenService } from './token.service';
 import { environment } from '../../../environments/environment';
@@ -66,30 +76,59 @@ export class AuthService {
 
   checkIfLogin(): void {
 
+    this.ensureSession().subscribe();
+
+  }
+
+
+  ensureSession(): Observable<boolean> {
+
     const token =
       this._tokenService.getAccessToken();
 
-    if (!token) {
-
-      this.userData.next(null);
-
-      return;
-
-    }
-
     const decode =
-      this.decodeToken(token);
+      token ? this.decodeToken(token) : null;
 
     if (decode) {
 
-      this.userData.next(
-        decode.sub
-      );
+      this.userData.next(decode.sub);
 
-    } else {
-      this.userData.next(null);
+      return of(true);
 
     }
+
+    if (!this._tokenService.getRefreshToken()) {
+
+      this.userData.next(null);
+
+      return of(false);
+
+    }
+
+    return this.refreshToken().pipe(
+
+      map(() => true),
+
+      catchError((err) => {
+
+
+        const isTemporary =
+          err instanceof HttpErrorResponse &&
+          (err.status === 0 || err.status >= 500);
+
+        if (!isTemporary) {
+
+          this._tokenService.removeTokens();
+
+          this.userData.next(null);
+
+        }
+
+        return of(false);
+
+      })
+
+    );
 
   }
 
@@ -123,7 +162,10 @@ export class AuthService {
 
   }
 
-  refreshToken() {
+
+  private refresh$: Observable<ILoginRes> | null = null;
+
+  refreshToken(): Observable<ILoginRes> {
 
     const refreshToken =
       this._tokenService.getRefreshToken();
@@ -131,55 +173,61 @@ export class AuthService {
     if (!refreshToken) {
 
       return throwError(
-        () => new Error(
-          'Refresh token not found'
-        )
+        () => new Error('Refresh token not found')
       );
 
     }
 
-    return this._http
-      .post<ILoginRes>(
-        this.apiURL + '/refresh-token',
-        {},
-        {
-          headers: {
-            Authorization:
-              `Bearer ${refreshToken}`
+    if (!this.refresh$) {
+
+      this.refresh$ = this._http
+        .post<ILoginRes>(
+          this.apiURL + '/refresh-token',
+          {},
+          {
+            headers: {
+              Authorization:
+                `Bearer ${refreshToken}`
+            }
           }
-        }
-      )
-      .pipe(
+        )
+        .pipe(
 
-        tap((res) => {
+          tap((res) => {
 
-          const newAccessToken =
-            res.data.access_token;
+            const newAccessToken =
+              res.data.access_token;
 
-          const newRefreshToken =
-            res.data.refresh_token;
+            const newRefreshToken =
+              res.data.refresh_token;
 
-          this._tokenService.setTokens(
-            newAccessToken,
-            newRefreshToken
-          );
-
-          const decode =
-            this.decodeToken(
-              newAccessToken
+            this._tokenService.setTokens(
+              newAccessToken,
+              newRefreshToken
             );
 
-          if (decode) {
+            const decode =
+              this.decodeToken(newAccessToken);
 
-            this.userData.next(
-              decode.sub
-            );
+            if (decode) {
 
-          }
+              this.userData.next(decode.sub);
 
-        })
+            }
 
-      );
+          }),
+
+          finalize(() => {
+            this.refresh$ = null;
+          }),
+
+          shareReplay(1)
+
+        );
+
+    }
+
+    return this.refresh$;
 
   }
 

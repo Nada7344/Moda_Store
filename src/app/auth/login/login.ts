@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 
 import {
   FormBuilder,
@@ -13,8 +13,21 @@ import {
   RouterLink
 } from '@angular/router';
 
+import {
+  Observable,
+  catchError,
+  finalize,
+  of,
+  tap
+} from 'rxjs';
+
 import { AuthService } from '../../core/services/auth.service';
 import { CartService } from '../../core/services/cart.service';
+import {
+  ICartResponse,
+  ISyncCartResponse
+} from '../../core/models/cart.model';
+import { getErrorMessage } from '../../core/utils/http-error';
 
 @Component({
   selector: 'app-login',
@@ -31,11 +44,11 @@ export class Login implements OnInit {
 
   loginForm: FormGroup;
 
-  isLoading = false;
+  isLoading = signal(false);
 
-  errorMessage = '';
+  errorMessage = signal('');
 
-  successMessage = '';
+  successMessage = signal('');
 
   showPassword = false;
 
@@ -49,20 +62,9 @@ export class Login implements OnInit {
 
     this.loginForm = this._fb.group({
 
-      email: [
-        '',
-        [
-          Validators.required,
-          Validators.email
-        ]
-      ],
+      email: ['', [Validators.required, Validators.email]],
 
-      password: [
-        '',
-        [
-          Validators.required
-        ]
-      ]
+      password: ['', [Validators.required]]
 
     });
 
@@ -70,18 +72,17 @@ export class Login implements OnInit {
 
   ngOnInit(): void {
 
-    const params =
-      this._route.snapshot.queryParamMap;
+    const params = this._route.snapshot.queryParamMap;
 
     if (params.get('verified')) {
 
-      this.successMessage =
-        'Email verified! You can now log in.';
+      this.successMessage.set('Email verified! You can now log in.');
 
     } else if (params.get('reset')) {
 
-      this.successMessage =
-        'Password reset! You can now log in with your new password.';
+      this.successMessage.set(
+        'Password reset! You can now log in with your new password.'
+      );
 
     }
 
@@ -89,9 +90,8 @@ export class Login implements OnInit {
 
   login(): void {
 
-    this.errorMessage = '';
-
-    this.successMessage = '';
+    this.errorMessage.set('');
+    this.successMessage.set('');
 
     if (this.loginForm.invalid) {
 
@@ -101,135 +101,54 @@ export class Login implements OnInit {
 
     }
 
-    this.isLoading = true;
+    this.isLoading.set(true);
 
     this._authService
       .login(this.loginForm.value)
       .subscribe({
 
-        next: (res) => {
-
-          const syncRequest =
-            this._cartService.syncGuestCart();
-
-          if (!syncRequest) {
-
-            this._cartService
-              .getCart(true)
-              .subscribe({
-
-                next: (cartResponse) => {
-
-                  this._cartService
-                    .setCartCount(
-                      cartResponse.data.cart
-                    );
-
-                  this.isLoading = false;
-
-                  this._redirectAfterLogin();
-
-                },
-
-                error: (error) => {
-
-                  console.error(
-                    'GET USER CART ERROR:',
-                    error
-                  );
-
-                  this.isLoading = false;
-
-                  this._redirectAfterLogin();
-
-                }
-
-              });
-
-            return;
-
-          }
-
-          syncRequest.subscribe({
-
-            next: (syncResponse) => {
-
-              console.log(
-                'CART SYNC SUCCESS:',
-                syncResponse
-              );
-
-              this._cartService
-                .removeGuestCart();
-
-              this._cartService
-                .setCartCount(
-                  syncResponse.data.cart
-                );
-
-              this.isLoading = false;
-
-              this._redirectAfterLogin();
-
-            },
-
-            error: (error) => {
-
-              console.error(
-                'CART SYNC ERROR:',
-                error
-              );
-
-              this._cartService
-                .getCart(true)
-                .subscribe({
-
-                  next: (cartResponse) => {
-
-                    this._cartService
-                      .setCartCount(
-                        cartResponse.data.cart
-                      );
-
-                    this.isLoading = false;
-
-                    this._redirectAfterLogin();
-
-                  },
-
-                  error: (cartError) => {
-
-                    console.error(
-                      'GET USER CART ERROR:',
-                      cartError
-                    );
-
-                    this.isLoading = false;
-
-                    this._redirectAfterLogin();
-
-                  }
-
-                });
-
-            }
-
-          });
-
-        },
+        next: () => this._loadCartThenRedirect(),
 
         error: (err) => {
 
-          console.error(
-            'LOGIN ERROR:',
-            err
-          );
+          this.isLoading.set(false);
 
-          this.isLoading = false;
-
-          this.handleLoginError(err);
+          this.errorMessage.set(getErrorMessage(err));
 
         }
+
+      });
+
+  }
+
+  /**
+   * Cart problems must never block the login:
+   * whatever happens, loading is released and the user is redirected.
+   */
+  private _loadCartThenRedirect(): void {
+
+    const syncRequest = this._cartService.syncGuestCart();
+
+    const cart$: Observable<ICartResponse | ISyncCartResponse> =
+      syncRequest
+        ? syncRequest.pipe(
+            tap(() => this._cartService.removeGuestCart()),
+            catchError(() => this._cartService.getCart(true))
+          )
+        : this._cartService.getCart(true);
+
+    cart$
+      .pipe(
+        catchError(() => of(null)),
+        finalize(() => this.isLoading.set(false))
+      )
+      .subscribe((res) => {
+
+        if (res) {
+          this._cartService.setCartCount(res.data.cart);
+        }
+
+        this._redirectAfterLogin();
 
       });
 
@@ -248,8 +167,7 @@ export class Login implements OnInit {
 
     }
 
-    const role =
-      this._authService.checkIfLoginWithRole();
+    const role = this._authService.checkIfLoginWithRole();
 
     if (role === 'admin') {
 
@@ -260,45 +178,6 @@ export class Login implements OnInit {
     }
 
     this._router.navigate(['/']);
-
-  }
-
-  private handleLoginError(
-    err: any
-  ): void {
-
-    if (err.status === 0) {
-
-      this.errorMessage =
-        'Unable to connect to the server. Please try again.';
-
-      return;
-
-    }
-
-    if (err.status === 401) {
-
-      this.errorMessage =
-        err.error?.message ||
-        'Invalid email or password.';
-
-      return;
-
-    }
-
-    if (err.status === 403) {
-
-      this.errorMessage =
-        err.error?.message ||
-        'You are not allowed to login.';
-
-      return;
-
-    }
-
-    this.errorMessage =
-      err.error?.message ||
-      'Something went wrong. Please try again.';
 
   }
 

@@ -327,10 +327,7 @@ addToCart(): void {
 
       next: response => {
 
-        console.log(
-          'Added to cart:',
-          response
-        );
+
 
       },
 
@@ -401,7 +398,7 @@ addToCart(): void {
 
     if (!isRatingValid || !isMessageValid) {
 
-     
+
       return;
 
     }
@@ -436,10 +433,6 @@ addToCart(): void {
 
         next: response => {
 
-          console.log(
-            'Review submitted:',
-            response
-          );
 
           this.reviewRate = 0;
 

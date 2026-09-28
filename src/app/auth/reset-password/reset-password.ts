@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -8,6 +8,7 @@ import {
 
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { getErrorMessage } from '../../core/utils/http-error';
 
 @Component({
   selector: 'app-reset-password',
@@ -22,9 +23,9 @@ export class ResetPassword implements OnInit {
 
   resetForm: FormGroup;
 
-  isLoading = false;
+  isLoading = signal(false);
 
-  errorMessage = '';
+  errorMessage = signal('');
 
   showPassword = false;
 
@@ -39,13 +40,7 @@ export class ResetPassword implements OnInit {
 
     this.resetForm = this._fb.group({
 
-      email: [
-        '',
-        [
-          Validators.required,
-          Validators.email
-        ]
-      ],
+      email: ['', [Validators.required, Validators.email]],
 
       otp: [
         '',
@@ -64,12 +59,7 @@ export class ResetPassword implements OnInit {
         ]
       ],
 
-      confirmPassword: [
-        '',
-        [
-          Validators.required
-        ]
-      ]
+      confirmPassword: ['', [Validators.required]]
 
     }, {
       validators: this.passwordsMatchValidator
@@ -79,8 +69,7 @@ export class ResetPassword implements OnInit {
 
   ngOnInit(): void {
 
-    const email =
-      this._route.snapshot.queryParamMap.get('email');
+    const email = this._route.snapshot.queryParamMap.get('email');
 
     if (email) {
 
@@ -92,19 +81,13 @@ export class ResetPassword implements OnInit {
 
   private passwordsMatchValidator(group: FormGroup) {
 
-    const password =
-      group.get('password')?.value;
+    const password = group.get('password')?.value;
 
-    const confirmPassword =
-      group.get('confirmPassword')?.value;
+    const confirmPassword = group.get('confirmPassword')?.value;
 
-    if (
-      confirmPassword &&
-      password !== confirmPassword
-    ) {
+    if (confirmPassword && password !== confirmPassword) {
 
-      group.get('confirmPassword')
-        ?.setErrors({ mismatch: true });
+      group.get('confirmPassword')?.setErrors({ mismatch: true });
 
     }
 
@@ -114,7 +97,7 @@ export class ResetPassword implements OnInit {
 
   submit(): void {
 
-    this.errorMessage = '';
+    this.errorMessage.set('');
 
     if (this.resetForm.invalid) {
 
@@ -124,7 +107,7 @@ export class ResetPassword implements OnInit {
 
     }
 
-    this.isLoading = true;
+    this.isLoading.set(true);
 
     const {
       confirmPassword,
@@ -137,7 +120,7 @@ export class ResetPassword implements OnInit {
 
         next: () => {
 
-          this.isLoading = false;
+          this.isLoading.set(false);
 
           this._router.navigate(
             ['/login'],
@@ -148,30 +131,13 @@ export class ResetPassword implements OnInit {
 
         error: (err) => {
 
-          this.isLoading = false;
+          this.isLoading.set(false);
 
-          this.handleError(err);
+          this.errorMessage.set(getErrorMessage(err));
 
         }
 
       });
-
-  }
-
-  private handleError(err: any): void {
-
-    if (err.status === 0) {
-
-      this.errorMessage =
-        'Unable to connect to the server. Please try again.';
-
-      return;
-
-    }
-
-    this.errorMessage =
-      err.error?.message ||
-      'Something went wrong. Please try again.';
 
   }
 

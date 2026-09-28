@@ -133,11 +133,6 @@ export class Navbar implements OnInit, OnDestroy {
 
             next: response => {
 
-              console.log(
-                'NAVBAR CART:',
-                response.data.cart
-              );
-
               this._cartService
                 .setCartCount(
                   response.data.cart

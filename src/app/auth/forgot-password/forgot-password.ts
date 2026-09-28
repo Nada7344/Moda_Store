@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -8,6 +8,7 @@ import {
 
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { getErrorMessage } from '../../core/utils/http-error';
 
 @Component({
   selector: 'app-forgot-password',
@@ -22,9 +23,9 @@ export class ForgotPassword {
 
   forgotForm: FormGroup;
 
-  isLoading = false;
+  isLoading = signal(false);
 
-  errorMessage = '';
+  errorMessage = signal('');
 
   constructor(
     private _fb: FormBuilder,
@@ -34,13 +35,7 @@ export class ForgotPassword {
 
     this.forgotForm = this._fb.group({
 
-      email: [
-        '',
-        [
-          Validators.required,
-          Validators.email
-        ]
-      ]
+      email: ['', [Validators.required, Validators.email]]
 
     });
 
@@ -48,7 +43,7 @@ export class ForgotPassword {
 
   submit(): void {
 
-    this.errorMessage = '';
+    this.errorMessage.set('');
 
     if (this.forgotForm.invalid) {
 
@@ -58,10 +53,9 @@ export class ForgotPassword {
 
     }
 
-    this.isLoading = true;
+    this.isLoading.set(true);
 
-    const email =
-      this.email?.value;
+    const email = this.email?.value;
 
     this._authService
       .forgotPassword({ email })
@@ -69,7 +63,7 @@ export class ForgotPassword {
 
         next: () => {
 
-          this.isLoading = false;
+          this.isLoading.set(false);
 
           this._router.navigate(
             ['/reset-password'],
@@ -80,40 +74,17 @@ export class ForgotPassword {
 
         error: (err) => {
 
-          this.isLoading = false;
+          this.isLoading.set(false);
 
-          this.handleError(err);
+          this.errorMessage.set(
+            err?.status === 404
+              ? 'No account found with this email.'
+              : getErrorMessage(err)
+          );
 
         }
 
       });
-
-  }
-
-  private handleError(err: any): void {
-
-    if (err.status === 0) {
-
-      this.errorMessage =
-        'Unable to connect to the server. Please try again.';
-
-      return;
-
-    }
-
-    if (err.status === 404) {
-
-      this.errorMessage =
-        err.error?.message ||
-        'No account found with this email.';
-
-      return;
-
-    }
-
-    this.errorMessage =
-      err.error?.message ||
-      'Something went wrong. Please try again.';
 
   }
 

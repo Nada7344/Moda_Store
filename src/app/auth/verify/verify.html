@@ -1,6 +1,6 @@
 <div class="auth">
 
-  <!-- ============ BRAND PANEL ============ -->
+  <!--  BRAND PANEL  -->
   <aside class="auth__brand" aria-hidden="true">
     <a routerLink="/home" class="auth__logo">Moda&nbsp;Store</a>
     <div class="auth__blocks">
@@ -14,7 +14,7 @@
     </div>
   </aside>
 
-  <!-- ============ FORM PANEL ============ -->
+  <!--  FORM PANEL  -->
   <div class="auth__form-side">
     <div class="auth-form">
 
@@ -74,23 +74,23 @@
             </p>
           }
 
-          @if (errorMessage) {
+          @if (errorMessage()) {
             <p class="otp-status otp-status--error">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
-              {{ errorMessage }}
+              {{ errorMessage() }}
             </p>
           }
 
-          @if (successMessage) {
+          @if (successMessage()) {
             <p class="otp-status otp-status--success">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M8 12l2.5 2.5L16 9"/></svg>
-              {{ successMessage }}
+              {{ successMessage() }}
             </p>
           }
         </div>
 
-        <button type="submit" class="btn btn--primary auth-form__submit" [disabled]="isLoading">
-          @if (isLoading) {
+        <button type="submit" class="btn btn--primary auth-form__submit" [disabled]="isLoading()">
+          @if (isLoading()) {
             Verifying...
           } @else {
             Verify Email
@@ -101,9 +101,9 @@
 
       <div class="otp-resend">
         <span>Didn't get it?</span>
-        <button type="button" [disabled]="resendCooldown > 0" (click)="resendOtp()">Resend code</button>
-        @if (resendCooldown > 0) {
-          <span class="otp-resend__timer">in {{ resendCooldown }}s</span>
+        <button type="button" [disabled]="resendCooldown() > 0 || isResending()" (click)="resendOtp()">Resend code</button>
+        @if (resendCooldown() > 0) {
+          <span class="otp-resend__timer">in {{ resendCooldown() }}s</span>
         }
       </div>
 

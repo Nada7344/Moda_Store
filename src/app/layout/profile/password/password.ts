@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -8,6 +8,7 @@ import {
 
 import { UserService } from '../../../core/services/user.service';
 import { TokenService } from '../../../core/services/token.service';
+import { getErrorMessage } from '../../../core/utils/http-error';
 
 @Component({
   selector: 'app-password',
@@ -24,10 +25,10 @@ export class Password {
 
   passwordForm: FormGroup;
 
-  isSaving = false;
+  isSaving = signal(false);
 
-  errorMessage = '';
-  successMessage = '';
+  errorMessage = signal('');
+  successMessage = signal('');
 
   showOldPassword = false;
   showNewPassword = false;
@@ -109,7 +110,7 @@ export class Password {
       password,
     } = this.passwordForm.value;
 
-    this.isSaving = true;
+    this.isSaving.set(true);
 
     this._userService
       .updatePassword({
@@ -125,10 +126,11 @@ export class Password {
             response.data.refreshToken
           );
 
-          this.successMessage =
-            'Your password has been updated successfully';
+          this.successMessage.set(
+            'Your password has been updated successfully'
+          );
 
-          this.isSaving = false;
+          this.isSaving.set(false);
 
           this.passwordForm.reset();
 
@@ -136,16 +138,11 @@ export class Password {
 
         error: (error) => {
 
-          console.error(
-            'UPDATE PASSWORD ERROR:',
-            error
+          this.errorMessage.set(
+            getErrorMessage(error, 'Failed to update your password')
           );
 
-          this.errorMessage =
-            error?.error?.message ||
-            'Failed to update your password';
-
-          this.isSaving = false;
+          this.isSaving.set(false);
 
         },
 
@@ -155,8 +152,8 @@ export class Password {
 
   private clearMessages(): void {
 
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.errorMessage.set('');
+    this.successMessage.set('');
 
   }
 

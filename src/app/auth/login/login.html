@@ -1,6 +1,6 @@
 <div class="auth">
 
-  <!-- ============ BRAND PANEL ============ -->
+  <!-- BRAND PANEL  -->
   <aside class="auth__brand" aria-hidden="true">
     <a routerLink="/home" class="auth__logo">Moda&nbsp;Store</a>
     <div class="auth__blocks">
@@ -22,17 +22,17 @@
       <h1 class="auth-form__title">Log in to your account</h1>
       <p class="auth-form__sub">New to Moda Store? <a routerLink="/register"><strong>Create an account</strong></a></p>
 
-      @if (errorMessage) {
+      @if (errorMessage()) {
         <div class="auth-form__banner auth-form__banner--error">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
-          <span>{{ errorMessage }}</span>
+          <span>{{ errorMessage() }}</span>
         </div>
       }
 
-      @if (successMessage) {
+      @if (successMessage()) {
         <div class="auth-form__banner auth-form__banner--success">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M8 12l2.5 2.5L16 9"/></svg>
-          <span>{{ successMessage }}</span>
+          <span>{{ successMessage() }}</span>
         </div>
       }
 
@@ -103,8 +103,8 @@
           <a routerLink="/forgot-password" class="auth-form__forgot">Forgot password?</a>
         </div>
 
-        <button type="submit" class="btn btn--primary auth-form__submit" [disabled]="isLoading">
-          @if (isLoading) {
+        <button type="submit" class="btn btn--primary auth-form__submit" [disabled]="isLoading()">
+          @if (isLoading()) {
             Logging in...
           } @else {
             Log In

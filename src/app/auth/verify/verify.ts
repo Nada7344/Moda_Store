@@ -4,7 +4,8 @@ import {
   OnDestroy,
   OnInit,
   QueryList,
-  ViewChildren
+  ViewChildren,
+  signal
 } from '@angular/core';
 import {
   FormBuilder,
@@ -15,6 +16,7 @@ import {
 
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { getErrorMessage } from '../../core/utils/http-error';
 
 @Component({
   selector: 'app-verify',
@@ -31,13 +33,15 @@ export class Verify implements OnInit, OnDestroy {
 
   email = '';
 
-  isLoading = false;
+  isLoading = signal(false);
 
-  errorMessage = '';
+  isResending = signal(false);
 
-  successMessage = '';
+  errorMessage = signal('');
 
-  resendCooldown = 0;
+  successMessage = signal('');
+
+  resendCooldown = signal(0);
 
   private _cooldownHandle?: ReturnType<typeof setInterval>;
 
@@ -68,8 +72,7 @@ export class Verify implements OnInit, OnDestroy {
 
   ngOnInit(): void {
 
-    this.email =
-      this._route.snapshot.queryParamMap.get('email') || '';
+    this.email = this._route.snapshot.queryParamMap.get('email') || '';
 
     if (!this.email) {
 
@@ -81,19 +84,14 @@ export class Verify implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
 
-    if (this._cooldownHandle) {
-
-      clearInterval(this._cooldownHandle);
-
-    }
+    clearInterval(this._cooldownHandle);
 
   }
 
   verify(): void {
 
-    this.errorMessage = '';
-
-    this.successMessage = '';
+    this.errorMessage.set('');
+    this.successMessage.set('');
 
     if (this.verifyForm.invalid) {
 
@@ -103,7 +101,7 @@ export class Verify implements OnInit, OnDestroy {
 
     }
 
-    this.isLoading = true;
+    this.isLoading.set(true);
 
     this._authService
       .verifyEmail({
@@ -114,7 +112,7 @@ export class Verify implements OnInit, OnDestroy {
 
         next: () => {
 
-          this.isLoading = false;
+          this.isLoading.set(false);
 
           this._router.navigate(
             ['/login'],
@@ -125,9 +123,9 @@ export class Verify implements OnInit, OnDestroy {
 
         error: (err) => {
 
-          this.isLoading = false;
+          this.isLoading.set(false);
 
-          this.handleError(err);
+          this.errorMessage.set(getErrorMessage(err));
 
         }
 
@@ -204,15 +202,16 @@ export class Verify implements OnInit, OnDestroy {
 
   resendOtp(): void {
 
-    if (this.resendCooldown > 0 || !this.email) {
+    if (this.resendCooldown() > 0 || this.isResending() || !this.email) {
 
       return;
 
     }
 
-    this.errorMessage = '';
+    this.errorMessage.set('');
+    this.successMessage.set('');
 
-    this.successMessage = '';
+    this.isResending.set(true);
 
     this._authService
       .resendOtp({ email: this.email })
@@ -220,8 +219,9 @@ export class Verify implements OnInit, OnDestroy {
 
         next: () => {
 
-          this.successMessage =
-            'A new code has been sent to your email.';
+          this.isResending.set(false);
+
+          this.successMessage.set('A new code has been sent to your email.');
 
           this.startCooldown();
 
@@ -229,7 +229,9 @@ export class Verify implements OnInit, OnDestroy {
 
         error: (err) => {
 
-          this.handleError(err);
+          this.isResending.set(false);
+
+          this.errorMessage.set(getErrorMessage(err));
 
         }
 
@@ -239,36 +241,21 @@ export class Verify implements OnInit, OnDestroy {
 
   private startCooldown(): void {
 
-    this.resendCooldown = 60;
+    clearInterval(this._cooldownHandle);
+
+    this.resendCooldown.set(60);
 
     this._cooldownHandle = setInterval(() => {
 
-      this.resendCooldown--;
+      this.resendCooldown.update((value) => value - 1);
 
-      if (this.resendCooldown <= 0) {
+      if (this.resendCooldown() <= 0) {
 
         clearInterval(this._cooldownHandle);
 
       }
 
     }, 1000);
-
-  }
-
-  private handleError(err: any): void {
-
-    if (err.status === 0) {
-
-      this.errorMessage =
-        'Unable to connect to the server. Please try again.';
-
-      return;
-
-    }
-
-    this.errorMessage =
-      err.error?.message ||
-      'Something went wrong. Please try again.';
 
   }
 
