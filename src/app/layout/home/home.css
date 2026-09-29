@@ -1,32 +1,52 @@
 .hero {
-  padding-block: var(--space-8) var(--space-9);
   overflow: hidden;
 }
 
-.hero {
+/* ---- Desktop hero: the desktop banner + spacing apply ONLY here ---- */
+.hero--desktop {
+  padding-block: var(--space-8) var(--space-9);
   background-image: url('/banners/hero_banner.png');
   background-size: cover;
   background-position: 100% center;
+  background-repeat: no-repeat;
 }
 
-/* ---- Mobile hero (hidden by default, shown under 640px) ---- */
+/* ---- Mobile / tablet hero (hidden by default, shown at 980px and below) ---- */
 .hero--mobile {
   display: none;
+  padding-block: 0;
 }
 
 .hero-mobile__media {
   position: relative;
-  min-height: 80vh;
+  min-height: 80vh;            /* fallback for old browsers */
+  min-height: min(80svh, 760px); /* stable height with the mobile browser bars */
+  /* solid base colour so nothing can show through a transparent PNG */
+  background-color: var(--color-white);
   background-image: url('/banners/mobile_banner.png');
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   padding: var(--space-6) var(--space-5) var(--space-8);
 }
 
+/* soft fade at the bottom so the text stays readable over the photo */
+.hero-mobile__media::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top,
+      rgba(255, 255, 255, 0.7) 0%,
+      rgba(255, 255, 255, 0.35) 45%,
+      rgba(255, 255, 255, 0) 75%);
+  pointer-events: none;
+}
+
 .hero-mobile__content {
+  position: relative; /* keeps the text above the fade */
   max-width: 65%;
 }
 
@@ -350,13 +370,11 @@
 /* ---- Reviews ---- */
 
 .reviews {
-  background: var(--color-beige-tint);
-}
-
-.reviews {
+  background-color: var(--color-beige-tint);
   background-image: url('/banners/review_banner.png');
   background-size: cover;
   background-position: 100% center;
+  background-repeat: no-repeat;
 }
 
 .reviews__carousel {
@@ -428,10 +446,6 @@
     display: block;
   }
 
-  .hero {
-    padding-block: 0;
-  }
-
   .product-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -440,6 +454,8 @@
     flex-basis: calc((100% - var(--space-5)) / 2);
   }
 }
+
+/* ---- Tablet (641px - 980px) ---- */
 @media (min-width: 641px) and (max-width: 980px) {
 
   .hero-mobile__content {
@@ -454,6 +470,7 @@
 
 }
 
+/* ---- Phones (640px and below) ---- */
 @media (max-width: 640px) {
   .categories__grid {
     gap: var(--space-3);
@@ -539,9 +556,5 @@
 
   .reviews__item {
     flex-basis: 88%;
-  }
-
-  .footer__inner {
-    grid-template-columns: 1fr;
   }
 }
