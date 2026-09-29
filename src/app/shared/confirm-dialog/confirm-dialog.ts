@@ -11,7 +11,9 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 })
 export class ConfirmDialog {
 
-  @Input() title = 'Are you sure?';
+  // NOTE: named `heading` (not `title`) so Angular doesn't also render a native
+  // HTML title attribute on the host element (that showed as a stray tooltip box).
+  @Input() heading = 'Are you sure?';
   @Input() message = '';
 
   @Input() confirmLabel = 'Confirm';
@@ -19,6 +21,7 @@ export class ConfirmDialog {
   @Input() cancelLabel = 'Cancel';
 
   @Input() isBusy = false;
+  @Input() confirmDisabled = false;
   @Input() errorMessage = '';
 
   @Output() confirmed = new EventEmitter<void>();
@@ -38,7 +41,7 @@ export class ConfirmDialog {
 
   onConfirm(): void {
 
-    if (this.isBusy) {
+    if (this.isBusy || this.confirmDisabled) {
 
       return;
 

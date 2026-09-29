@@ -121,10 +121,7 @@ export class Login implements OnInit {
 
   }
 
-  /**
-   * Cart problems must never block the login:
-   * whatever happens, loading is released and the user is redirected.
-   */
+ 
   private _loadCartThenRedirect(): void {
 
     const syncRequest = this._cartService.syncGuestCart();

@@ -35,6 +35,38 @@ export class DeleteCategory {
   isDeleting = false;
   errorMessage = '';
 
+  get activeSubcategories() {
+
+    return (this.category?.subcategories || []).filter(sub => sub.isActive);
+
+  }
+
+  // The backend refuses to delete a category that still has active subcategories,
+  // so we tell the admin up-front instead of letting them hit a confusing error.
+  get isBlocked(): boolean {
+
+    return this.activeSubcategories.length > 0;
+
+  }
+
+  get message(): string {
+
+    const name = this.category.name;
+
+    if (this.isBlocked) {
+
+      const list = this.activeSubcategories.map(sub => sub.name).join(', ');
+
+      return `“${name}” still has active subcategories (${list}). ` +
+        'Delete or deactivate them first (use the "Subcategories" button on the row), then try again.';
+
+    }
+
+    return `This will deactivate “${name}”. ` +
+      'It cannot be deleted while it still has active products.';
+
+  }
+
   cancel(): void {
 
     if (this.isDeleting) {
@@ -49,7 +81,7 @@ export class DeleteCategory {
 
   confirm(): void {
 
-    if (this.isDeleting) {
+    if (this.isDeleting || this.isBlocked) {
 
       return;
 
@@ -72,11 +104,22 @@ export class DeleteCategory {
 
         console.error('DELETE CATEGORY — DELETE ERROR:', error);
 
+        this.isDeleting = false;
+
+        // 404 = the category is already gone/deactivated on the server.
+        // Our list is stale, so close the dialog and refresh it.
+        if (error?.status === 404) {
+
+          this.deleted.emit();
+
+          return;
+
+        }
+
         this.errorMessage =
           error?.error?.message ||
           'Unable to delete this category right now.';
 
-        this.isDeleting = false;
         this._cdr.detectChanges();
 
       }

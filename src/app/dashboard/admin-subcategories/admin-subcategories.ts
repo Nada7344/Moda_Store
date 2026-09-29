@@ -108,7 +108,7 @@ export class AdminSubcategories {
 
       const id = this.subcategoryPendingDelete._id;
 
-      this.category.subcategories = this.category.subcategories.filter(
+      this.category.subcategories = (this.category.subcategories || []).filter(
         sub => sub._id !== id
       );
 

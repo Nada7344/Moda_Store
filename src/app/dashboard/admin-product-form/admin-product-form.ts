@@ -210,7 +210,7 @@ export class AdminProductForm implements OnInit {
 
     const category = this.categories.find(c => c._id === this.form.category);
 
-    return category?.subcategories || [];
+    return (category?.subcategories || []).filter(sub => sub.isActive !== false);
 
   }
 
@@ -222,6 +222,12 @@ export class AdminProductForm implements OnInit {
 
   }
 
+  isDraggingOver = false;
+
+  private readonly _maxImages = 2;
+  private readonly _maxImageBytes = 5 * 1024 * 1024;
+  private readonly _allowedTypes = ['image/png', 'image/jpeg'];
+
   onFilesSelected(fileList: FileList | null): void {
 
     if (!fileList || !fileList.length) {
@@ -230,42 +236,107 @@ export class AdminProductForm implements OnInit {
 
     }
 
-    const remainingSlots = 2 - this.images.length;
+    // Copy the File objects out right away: the <input>'s FileList is "live"
+    // and gets emptied when we reset the input value in the template.
+    const files = Array.from(fileList);
+
+    this.errorMessage = '';
+
+    const remainingSlots = this._maxImages - this.images.length;
 
     if (remainingSlots <= 0) {
 
-      this.errorMessage = 'You can only attach up to 2 images. Remove one first.';
+      this.errorMessage = `You can only attach up to ${this._maxImages} images. Remove one first.`;
       this._cdr.detectChanges();
 
       return;
 
     }
 
-    Array.from(fileList)
-      .slice(0, remainingSlots)
-      .forEach(file => {
+    files.slice(0, remainingSlots).forEach(file => {
+
+      if (!this._allowedTypes.includes(file.type)) {
+
+        this.errorMessage = 'Only PNG or JPG images are allowed.';
+        this._cdr.detectChanges();
+
+        return;
+
+      }
+
+      if (file.size > this._maxImageBytes) {
+
+        this.errorMessage = 'Each image must be 5MB or smaller.';
+        this._cdr.detectChanges();
+
+        return;
+
+      }
+
+      // Use a data: URL for the preview. Angular's [src] sanitizer can rewrite
+      // blob: URLs to "unsafe:blob:..." which is why the preview showed a broken image.
+      const reader = new FileReader();
+
+      reader.onload = () => {
+
+        if (this.images.length >= this._maxImages) {
+
+          return;
+
+        }
 
         this.images.push({
-          previewUrl: URL.createObjectURL(file),
+          previewUrl: reader.result as string,
           file,
           existingImage: null,
         });
 
-      });
+        this._cdr.detectChanges();
 
-    this._cdr.detectChanges();
+      };
+
+      reader.onerror = () => {
+
+        this.errorMessage = 'Could not read this image. Please try another file.';
+        this._cdr.detectChanges();
+
+      };
+
+      reader.readAsDataURL(file);
+
+    });
+
+  }
+
+  onDragOver(event: DragEvent): void {
+
+    event.preventDefault();
+
+    this.isDraggingOver = true;
+
+  }
+
+  onDragLeave(event: DragEvent): void {
+
+    event.preventDefault();
+
+    this.isDraggingOver = false;
+
+  }
+
+  onDrop(event: DragEvent): void {
+
+    event.preventDefault();
+
+    this.isDraggingOver = false;
+
+    this.onFilesSelected(event.dataTransfer?.files || null);
 
   }
 
   removeImage(index: number): void {
 
-    const [removed] = this.images.splice(index, 1);
-
-    if (removed?.file) {
-
-      URL.revokeObjectURL(removed.previewUrl);
-
-    }
+    this.images.splice(index, 1);
 
     this._cdr.detectChanges();
 
