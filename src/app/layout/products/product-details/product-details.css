@@ -1,4 +1,4 @@
-/* 
+/*
    PRODUCT DETAILS
  */
 
@@ -12,7 +12,7 @@
 }
 
 
-/* 
+/*
    LOADING / EMPTY
  */
 
@@ -37,7 +37,7 @@
 }
 
 
-/* 
+/*
    BREADCRUMB
  */
 
@@ -64,10 +64,12 @@
 .breadcrumb__current {
   color: var(--color-ink);
   font-weight: 500;
+  min-width: 0;
+  overflow-wrap: anywhere; /* long product names never push the page sideways */
 }
 
 
-/* 
+/*
    PRODUCT LAYOUT
  */
 
@@ -79,7 +81,7 @@
 }
 
 
-/* 
+/*
    GALLERY
  */
 
@@ -149,7 +151,7 @@
 }
 
 
-/* 
+/*
    PRODUCT INFO
  */
 
@@ -171,17 +173,19 @@
   line-height: 1.1;
   font-weight: 600;
   color: var(--color-ink);
+  overflow-wrap: anywhere;
 }
 
 
-/* 
+/*
    RATING
  */
 
 .pdp__rating-row {
   display: flex;
   align-items: center;
-  gap: 14px;
+  flex-wrap: wrap;
+  gap: 6px 14px;
   margin-top: 18px;
 }
 
@@ -223,7 +227,7 @@
 }
 
 
-/* 
+/*
    PRICE
  */
 
@@ -244,7 +248,7 @@
 }
 
 
-/* 
+/*
    AVAILABILITY
  */
 
@@ -263,7 +267,7 @@
 }
 
 
-/* 
+/*
    META
  */
 
@@ -300,7 +304,7 @@
 }
 
 
-/* 
+/*
    MESSAGE
  */
 
@@ -314,7 +318,7 @@
 }
 
 
-/* 
+/*
    PURCHASE
  */
 
@@ -390,7 +394,7 @@
 }
 
 
-/* 
+/*
    REVIEWS
  */
 
@@ -398,6 +402,7 @@
   margin-top: 90px;
   padding-top: 50px;
   border-top: 1px solid var(--color-gray);
+  scroll-margin-top: 80px; /* clears the sticky navbar when jumping to #reviews */
 }
 
 .reviews > h2 {
@@ -407,7 +412,7 @@
 }
 
 
-/* 
+/*
    REVIEW SUMMARY
  */
 
@@ -438,7 +443,7 @@
 }
 
 
-/* 
+/*
    REVIEW STATES
  */
 
@@ -450,7 +455,7 @@
 }
 
 
-/* 
+/*
    REVIEW LIST
  */
 
@@ -495,8 +500,8 @@
   background: var(--color-ink-faint);
 }
 
-/* Soft fade hinting there's more to scroll — only shown once there
-   are more than 2 reviews. */
+/* Soft fade hinting there's more to scroll (desktop only — on touch
+   screens the list becomes a horizontal swipe carousel, see below). */
 .review-list__viewport.has-more::after {
   content: '';
   position: absolute;
@@ -573,10 +578,11 @@
   color: var(--color-ink-soft);
   line-height: 1.7;
   font-size: 14px;
+  overflow-wrap: anywhere;
 }
 
 
-/* 
+/*
    REVIEW FORM
  */
 
@@ -620,7 +626,7 @@
 }
 
 
-/* 
+/*
    FORM FIELD
  */
 
@@ -658,7 +664,7 @@
 }
 
 
-/* 
+/*
    REVIEW FORM FEEDBACK
    (already reviewed / submitted & pending approval / errors)
  */
@@ -683,15 +689,23 @@
 }
 
 
-/* 
+/*
    RESPONSIVE
  */
 
+/* ---------- Tablet & phone (900px and below) ---------- */
 @media (max-width: 900px) {
 
   .pdp__layout {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 32px;
+  }
+
+  /* keep the photo a sensible size on tablets instead of full-width */
+  .pdp__gallery {
+    width: 100%;
+    max-width: 620px;
+    margin-inline: auto;
   }
 
   .pdp__info {
@@ -699,20 +713,65 @@
   }
 
   .reviews {
-    margin-top: 60px;
+    margin-top: 56px;
+    padding-top: 36px;
+  }
+
+  /* Reviews: on touch screens a scroll-box inside a scrolling page traps
+     the finger and cuts cards in half. Use a horizontal swipe carousel
+     instead — every card is shown whole. */
+  .review-list__viewport {
+    padding: 14px;
+  }
+
+  .review-list__viewport.has-more::after {
+    display: none;
   }
 
   .review-list {
-    max-height: 240px;
+    display: flex;
+    gap: 14px;
+    max-height: none;
+    padding: 0 0 4px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
 
+  .review-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .review {
+    flex: 0 0 72%;
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+
+  .review:only-child {
+    flex-basis: 100%;
+  }
 }
 
 
+/* no "lift" animation on touch devices (it sticks after a tap) */
+@media (hover: none) {
+
+  .review:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+
+/* ---------- Phone (600px and below) ---------- */
 @media (max-width: 600px) {
 
   .pdp {
-    padding: 25px 0 60px;
+    padding: 20px 0 56px;
   }
 
   .container {
@@ -720,15 +779,49 @@
   }
 
   .breadcrumb {
-    margin-bottom: 20px;
+    margin-bottom: 18px;
+    gap: 6px;
+    font-size: 13px;
+  }
+
+  .gallery__thumbs {
+    gap: 10px;
+    scroll-snap-type: x proximity;
+  }
+
+  .gallery__thumb {
+    flex-basis: 64px;
+    width: 64px;
+    height: 64px;
+    scroll-snap-align: start;
   }
 
   .pdp__title {
-    font-size: 30px;
+    font-size: 28px;
+  }
+
+  .pdp__price-row {
+    margin-top: 20px;
+  }
+
+  .pdp__price {
+    font-size: 24px;
+  }
+
+  .pdp__meta > div {
+    grid-template-columns: 96px 1fr;
+    gap: 10px;
+  }
+
+  .pdp__desc {
+    margin-top: 20px;
+    font-size: 15px;
+    line-height: 1.7;
   }
 
   .pdp__purchase-row {
     flex-direction: column;
+    margin-top: 24px;
   }
 
   .qty-select {
@@ -739,30 +832,125 @@
     width: 100%;
   }
 
-  .reviews__avg {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 8px;
+  /* ---- Reviews ---- */
+
+  .reviews {
+    margin-top: 44px;
+    padding-top: 28px;
   }
 
+  .reviews > h2 {
+    font-size: 24px;
+  }
+
+  /* summary card: big score on the left, stars + count on the right */
   .reviews__summary {
-    padding: 20px;
+    margin-top: 18px;
+    padding: 18px 20px;
+  }
+
+  .reviews__avg {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 18px;
+    row-gap: 4px;
+    align-items: center;
+  }
+
+  .reviews__avg-score {
+    grid-row: 1 / span 2;
+    font-size: 44px;
+    line-height: 1;
+  }
+
+  .reviews__avg .rating {
+    align-self: end;
+  }
+
+  .reviews__avg-count {
+    align-self: start;
+    font-size: 13px;
+  }
+
+  .review-list__viewport {
+    margin-top: 18px;
+    padding: 12px;
   }
 
   .review {
-    padding: 18px;
+    flex-basis: 88%;
+    padding: 16px;
   }
 
+  /* avatar | name + stars, with the date tucked on its own line below */
   .review__head {
     flex-wrap: wrap;
+    gap: 6px 12px;
+  }
+
+  .review__avatar {
+    width: 38px;
+    height: 38px;
+    font-size: 16px;
+  }
+
+  .review__who {
+    flex: 1 1 calc(100% - 52px);
   }
 
   .review__date {
-    margin-left: 56px;
+    flex-basis: 100%;
+    margin-left: 50px; /* avatar (38) + gap (12) */
   }
+
+  .review__message {
+    margin-top: 12px;
+    padding-top: 12px;
+  }
+
+  /* ---- Review form ---- */
 
   .review-form {
-    padding: 22px;
+    margin-top: 28px;
+    padding: 20px 16px;
   }
 
+  .review-form h3 {
+    font-size: 18px;
+  }
+
+  .review-form__stars {
+    gap: 2px;
+  }
+
+  .review-form__stars button {
+    padding: 6px; /* bigger tap target */
+    font-size: 28px;
+  }
+
+  /* 16px stops iOS Safari from zooming the page when the textarea is focused */
+  .field__textarea {
+    font-size: 16px;
+  }
+
+  .review-form .btn {
+    width: 100%;
+  }
+}
+
+
+/* ---------- Very small phones (360px and below) ---------- */
+@media (max-width: 360px) {
+
+  .pdp__title {
+    font-size: 25px;
+  }
+
+  .reviews__avg-score {
+    font-size: 38px;
+  }
+
+  .review {
+    flex-basis: 92%;
+  }
 }
