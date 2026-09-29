@@ -43,6 +43,8 @@ export class Verify implements OnInit, OnDestroy {
 
   resendCooldown = signal(0);
 
+  emailSentMessage = signal(true);
+
   private _cooldownHandle?: ReturnType<typeof setInterval>;
 
   digits: string[] = ['', '', '', '', '', ''];
@@ -71,15 +73,14 @@ export class Verify implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-
     this.email = this._route.snapshot.queryParamMap.get('email') || '';
 
     if (!this.email) {
-
       this._router.navigate(['/register']);
-
+      return;
     }
 
+    this.emailSentMessage.set(true);
   }
 
   ngOnDestroy(): void {
@@ -221,7 +222,7 @@ export class Verify implements OnInit, OnDestroy {
 
           this.isResending.set(false);
 
-          this.successMessage.set('A new code has been sent to your email.');
+          this.successMessage.set('New code sent! Please check your inbox or Spam/Junk folder.' );
 
           this.startCooldown();
 

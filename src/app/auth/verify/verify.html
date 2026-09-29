@@ -19,81 +19,79 @@
     <div class="auth-form">
 
       <a routerLink="/register" class="auth-form__back">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M15 5l-7 7 7 7"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M15 5l-7 7 7 7" />
+        </svg>
         Back
       </a>
 
       <p class="eyebrow auth-form__eyebrow">One more step</p>
       <h1 class="auth-form__title">Verify your email</h1>
       <p class="auth-form__sub">
-        @if (email) {
-          We sent a 6-digit code to <strong>{{ email }}</strong>.
-        } @else {
-          Enter the 6-digit code sent to your email.
-        }
+        Enter the 6-digit verification code sent to your email.
       </p>
 
-      <form
-        class="auth-form__fields"
-        [formGroup]="verifyForm"
-        (ngSubmit)="verify()"
-      >
+      <form class="auth-form__fields" [formGroup]="verifyForm" (ngSubmit)="verify()">
 
         <div class="field">
           <label class="field__label" id="otp-label">Verification code</label>
 
-          <div
-            class="otp-group"
-            [class.otp-group--error]="otp?.invalid && otp?.touched"
-            role="group"
-            aria-labelledby="otp-label"
-          >
+          <div class="otp-group" [class.otp-group--error]="otp?.invalid && otp?.touched" role="group"
+            aria-labelledby="otp-label">
             @for (digit of digits; track $index) {
-              <input
-                #otpBox
-                type="text"
-                inputmode="numeric"
-                maxlength="1"
-                autocomplete="one-time-code"
-                [value]="digit"
-                (input)="onDigitInput($index, $event)"
-                (keydown)="onDigitKeydown($index, $event)"
-                (paste)="onDigitPaste($event)"
-              >
+            <input #otpBox type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" [value]="digit"
+              (input)="onDigitInput($index, $event)" (keydown)="onDigitKeydown($index, $event)"
+              (paste)="onDigitPaste($event)">
             }
           </div>
 
           @if (otp?.invalid && otp?.touched) {
-            <p class="otp-status otp-status--error">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
-              @if (otp?.errors?.['required']) {
-                Verification code is required.
-              } @else {
-                Enter the 6-digit code.
-              }
-            </p>
+          <p class="otp-status otp-status--error">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 8v5M12 16h.01" />
+            </svg>
+            @if (otp?.errors?.['required']) {
+            Verification code is required.
+            } @else {
+            Enter the 6-digit code.
+            }
+          </p>
           }
 
           @if (errorMessage()) {
-            <p class="otp-status otp-status--error">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
-              {{ errorMessage() }}
-            </p>
+          <p class="otp-status otp-status--error">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 8v5M12 16h.01" />
+            </svg>
+            {{ errorMessage() }}
+          </p>
           }
 
-          @if (successMessage()) {
-            <p class="otp-status otp-status--success">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M8 12l2.5 2.5L16 9"/></svg>
-              {{ successMessage() }}
-            </p>
+          @if (emailSentMessage() && email) {
+          <div class="email-notice">
+            <div class="email-notice__content">
+              <strong>Check your email</strong>
+
+              <p class="par-highlight">
+                We’ve sent a 6-digit verification code to
+                <b>{{ email }}</b>.
+              </p>
+
+              <span >
+                Can’t find it? Check your <b>Spam</b> folder.
+              </span>
+            </div>
+          </div>
           }
         </div>
 
         <button type="submit" class="btn btn--primary auth-form__submit" [disabled]="isLoading()">
           @if (isLoading()) {
-            Verifying...
+          Verifying...
           } @else {
-            Verify Email
+          Verify Email
           }
         </button>
 
@@ -101,9 +99,10 @@
 
       <div class="otp-resend">
         <span>Didn't get it?</span>
-        <button type="button" [disabled]="resendCooldown() > 0 || isResending()" (click)="resendOtp()">Resend code</button>
+        <button type="button" [disabled]="resendCooldown() > 0 || isResending()" (click)="resendOtp()">Resend
+          code</button>
         @if (resendCooldown() > 0) {
-          <span class="otp-resend__timer">in {{ resendCooldown() }}s</span>
+        <span class="otp-resend__timer">in {{ resendCooldown() }}s</span>
         }
       </div>
 
