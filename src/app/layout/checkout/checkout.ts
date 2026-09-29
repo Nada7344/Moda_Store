@@ -104,6 +104,27 @@ interface IOrderResponse {
   };
 }
 
+interface ITempAddress {
+
+  label: 'home' | 'work' | 'other';
+
+  street: string;
+
+  city: string;
+
+  country: string;
+
+  state?: string;
+
+  postalCode?: string;
+
+  building?: string;
+
+  apartment?: string;
+
+  phone?: string;
+}
+
 interface INewAddress {
 
   label: 'Home' | 'Work' | 'Other';
@@ -156,6 +177,11 @@ export class Checkout implements OnInit {
   isAddingNewAddress = false;
 
   saveNewAddress = false;
+
+  // Address entered for this order only (not saved to the account).
+  tempAddress: ITempAddress | null = null;
+
+  isTempSelected = false;
 
   isLoading = true;
 
@@ -430,21 +456,51 @@ export class Checkout implements OnInit {
     this.selectedAddressId =
       addressId;
 
+    this.isTempSelected = false;
+
     this.isAddingNewAddress = false;
 
     this.errorMessage = '';
+
+    this.successMessage = '';
+
+  }
+
+  selectTempAddress(): void {
+
+    this.isTempSelected = true;
+
+    this.selectedAddressId = null;
+
+    this.isAddingNewAddress = false;
+
+    this.errorMessage = '';
+
+    this.successMessage = '';
 
   }
   showNewAddress(): void {
 
     this.isAddingNewAddress = true;
 
+    this.isTempSelected = false;
+
     this.selectedAddressId = null;
 
     this.errorMessage = '';
 
+    this.successMessage = '';
+
   }
   hideNewAddress(): void {
+
+    if (this.tempAddress) {
+
+      this.selectTempAddress();
+
+      return;
+
+    }
 
     if (this.addresses.length > 0) {
 
@@ -520,6 +576,8 @@ export class Checkout implements OnInit {
 
     this.errorMessage = '';
 
+    this.successMessage = '';
+
     if (
       !this.newAddress.street.trim()
     ) {
@@ -542,86 +600,103 @@ export class Checkout implements OnInit {
 
     }
 
+    // Not saving to the account: keep it as a one-time address for this order.
+    if (!this.saveNewAddress) {
+
+      this.tempAddress = this.buildAddressPayload();
+
+      this.resetNewAddress();
+
+      this.selectTempAddress();
+
+      this.successMessage =
+        'Address added for this order.';
+
+      this._cdr.detectChanges();
+
+      return;
+
+    }
+
     this.isSubmitting = true;
 
     const addressPayload = {
 
       ...this.buildAddressPayload(),
 
-      isDefault:
-        this.saveNewAddress
+      isDefault: true
 
     };
 
+    this._http
+      .post<{
+        status: number;
+        message: string;
+        data: {
+          address: IAddress[];
+        };
+      }>(
+        `${this.userApiURL}/address`,
+        addressPayload
+      )
+      .pipe(
 
-    if (this.saveNewAddress) {
+        finalize(() => {
 
-      this._http
-        .post<{
-          status: number;
-          message: string;
-          data: {
-            address: IAddress[];
-          };
-        }>(
-          `${this.userApiURL}/address`,
-          addressPayload
-        )
-        .pipe(
+          this.isSubmitting = false;
 
-          finalize(() => {
+          this._cdr.detectChanges();
 
-            this.isSubmitting = false;
+        })
 
-          })
+      )
+      .subscribe({
 
-        )
-        .subscribe({
+        next: response => {
 
-          next: response => {
+          this.addresses =
+            response.data.address || [];
 
-            this.addresses =
-              response.data.address || [];
+          const lastAddress =
+            this.addresses[
+              this.addresses.length - 1
+            ];
 
-            const lastAddress =
-              this.addresses[
-                this.addresses.length - 1
-              ];
+          if (lastAddress) {
 
-            if (lastAddress) {
-
-              this.selectedAddressId =
-                lastAddress._id;
-
-            }
-
-            this.isAddingNewAddress =
-              false;
-
-            this.resetNewAddress();
-
-          },
-
-          error: error => {
-
-            console.error(
-              'Add Address Error:',
-              error
-            );
-
-            this.errorMessage =
-              error?.error?.message ||
-              'Unable to save address.';
+            this.selectedAddressId =
+              lastAddress._id;
 
           }
 
-        });
+          this.tempAddress = null;
 
-      return;
+          this.isTempSelected = false;
 
-    }
+          this.isAddingNewAddress =
+            false;
 
-    this.isSubmitting = false;
+          this.resetNewAddress();
+
+          this.successMessage =
+            'Address saved to your account.';
+
+        },
+
+        error: error => {
+
+          console.error(
+            'Add Address Error:',
+            error
+          );
+
+          this.errorMessage =
+            error?.error?.message ||
+            'Unable to save address.';
+
+        }
+
+      });
 
   }
 
@@ -666,6 +741,20 @@ export class Checkout implements OnInit {
 
       this.errorMessage =
         'Your cart is empty.';
+
+      return;
+
+    }
+
+    if (
+      this.isTempSelected &&
+      this.tempAddress &&
+      !this.isAddingNewAddress
+    ) {
+
+      this.submitOrder({
+        address: this.tempAddress
+      });
 
       return;
 
