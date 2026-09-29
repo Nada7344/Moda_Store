@@ -1,17 +1,17 @@
-/* ============================================================
+/* 
    ADMIN DASHBOARD — layout & components
    Built on top of the storefront design tokens (variables.css,
    reset.css, global.css). Reuses .btn, .field, .table,
    .status-badge, .pagination, .modal as-is.
-   ============================================================ */
+    */
 
 body.admin {
   background: var(--color-beige-tint);
 }
 
-/* ============================================================
+/* 
    SHELL
-   ============================================================ */
+    */
 .admin-shell {
   display: flex;
   min-height: 100vh;
@@ -20,9 +20,9 @@ body.admin {
 /* ---- Mobile sidebar toggle (CSS-only, same pattern as .modal) ---- */
 .sidebar-toggle { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
 
-/* ============================================================
+/* 
    SIDEBAR
-   ============================================================ */
+    */
 .admin-sidebar {
   width: 264px;
   flex-shrink: 0;
@@ -136,9 +136,9 @@ body.admin {
 .admin-account__logout:hover { background: var(--color-beige-tint); color: var(--color-danger); }
 .admin-account__logout svg { width: 17px; height: 17px; }
 
-/* ============================================================
+/* 
    MAIN COLUMN
-   ============================================================ */
+    */
 .admin-main {
   flex: 1;
   min-width: 0;
@@ -230,9 +230,9 @@ body.admin {
 
 .breadcrumb { margin-bottom: var(--space-2); }
 
-/* ============================================================
+/* 
    STAT CARDS
-   ============================================================ */
+    */
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -277,9 +277,9 @@ body.admin {
 .stat-card__value { font-family: var(--font-display); font-size: 2rem; color: var(--color-ink); line-height: var(--lh-tight); }
 .stat-card__label { font-size: var(--fs-small); color: var(--color-ink-faint); }
 
-/* ============================================================
+/* 
    PANEL (generic white card wrapper for tables/content)
-   ============================================================ */
+    */
 .panel {
   background: var(--color-white);
   border: 1px solid var(--color-gray);
@@ -338,9 +338,9 @@ body.admin {
   align-items: start;
 }
 
-/* ============================================================
+/* 
    FILTER BAR (search + selects, above tables)
-   ============================================================ */
+    */
 .filters-bar {
   display: flex;
   align-items: center;
@@ -380,9 +380,9 @@ body.admin {
 .filter-chip:hover { background: var(--color-beige-tint); color: var(--color-ink); }
 .filter-chip--active { background: var(--color-ink); border-color: var(--color-ink); color: var(--color-white); }
 
-/* ============================================================
+/* 
    TABLE — helpers on top of the global .table
-   ============================================================ */
+    */
 .table-wrap { overflow-x: auto; }
 .table--admin { width: 100%; min-width: 720px; }
 .table--admin th:first-child, .table--admin td:first-child { padding-left: var(--space-5); }
@@ -440,15 +440,15 @@ body.admin {
 .rating-cell svg { width: 14px; height: 14px; }
 .rating-cell span { color: var(--color-ink-soft); font-size: var(--fs-small); margin-left: 2px; }
 
-/* ============================================================
+/* 
    EMPTY / LOADING inline states for admin tables
-   ============================================================ */
+    */
 .table-empty { text-align: center; padding: var(--space-8) var(--space-5); color: var(--color-ink-faint); }
 .table-empty svg { width: 40px; height: 40px; margin-inline: auto; margin-bottom: var(--space-3); opacity: 0.7; }
 
-/* ============================================================
+/* 
    ACTIVITY LIST (dashboard side panel)
-   ============================================================ */
+    */
 .activity-list { display: flex; flex-direction: column; }
 .activity-item {
   display: flex; align-items: flex-start; gap: var(--space-3);
@@ -466,9 +466,9 @@ body.admin {
 .activity-item__text strong { font-weight: var(--fw-semibold); }
 .activity-item__time { font-size: var(--fs-caption); color: var(--color-ink-faint); margin-top: 0.15rem; }
 
-/* ============================================================
+/* 
    SIMPLE BAR CHART (pure CSS, no JS/canvas — sales overview)
-   ============================================================ */
+    */
 .bar-chart {
   display: flex;
   align-items: flex-end;
@@ -498,9 +498,9 @@ body.admin {
 .bar-chart__col:hover .bar-chart__bar--peak { background: var(--color-ink); }
 .bar-chart__label { font-size: var(--fs-caption); color: var(--color-ink-faint); }
 
-/* ============================================================
+/* 
    FORM CARD (product / category create-edit pages)
-   ============================================================ */
+    */
 .form-card {
   background: var(--color-white);
   border: 1px solid var(--color-gray);
@@ -519,6 +519,9 @@ body.admin {
 }
 
 .image-drop {
+  display: block;
+  position: relative;
+  cursor: pointer;
   border: 1.5px dashed var(--color-gray);
   border-radius: var(--radius-md);
   padding: var(--space-6);
@@ -529,6 +532,7 @@ body.admin {
 .image-drop svg { width: 28px; height: 28px; margin-inline: auto; margin-bottom: var(--space-3); }
 .image-drop strong { color: var(--color-ink); font-weight: var(--fw-semibold); }
 
+.image-drop--over { border-color: var(--color-ink); background: var(--color-beige-tint); }
 .image-preview-grid { display: flex; gap: var(--space-3); margin-top: var(--space-4); flex-wrap: wrap; }
 .image-preview {
   position: relative;
@@ -537,7 +541,9 @@ body.admin {
   background: var(--color-beige-tint);
   display: flex; align-items: center; justify-content: center;
   color: var(--color-ink);
+  overflow: visible;
 }
+.image-preview img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
 .image-preview svg { width: 40%; height: 40%; opacity: 0.85; }
 .image-preview__remove {
   position: absolute; top: -6px; right: -6px;
@@ -545,11 +551,13 @@ body.admin {
   background: var(--color-ink); color: var(--color-white);
   display: flex; align-items: center; justify-content: center;
   font-size: 11px;
+  cursor: pointer;
+  border: 0; padding: 0; line-height: 1;
 }
 
-/* ============================================================
+/* 
    TIMELINE (order details status history)
-   ============================================================ */
+    */
 .timeline { display: flex; flex-direction: column; }
 .timeline-item { display: flex; gap: var(--space-4); }
 .timeline-item__rail { display: flex; flex-direction: column; align-items: center; }
@@ -562,9 +570,9 @@ body.admin {
 .timeline-item__title { font-size: var(--fs-small); font-weight: var(--fw-semibold); color: var(--color-ink); }
 .timeline-item__time { font-size: var(--fs-caption); color: var(--color-ink-faint); margin-top: 0.15rem; }
 
-/* ============================================================
+/* 
    RESPONSIVE
-   ============================================================ */
+    */
 @media (max-width: 1100px) {
   .stat-grid { grid-template-columns: repeat(2, 1fr); }
   .content-grid { grid-template-columns: 1fr; }
@@ -595,3 +603,25 @@ body.admin {
   .page-head__actions { width: 100%; }
   .page-head__actions .btn { flex: 1; }
 }
+
+/* 
+   SUBCATEGORY CHIPS (categories table)
+    */
+.sub-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+.sub-chip {
+  display: inline-flex; align-items: center;
+  padding: 0.2rem 0.7rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-beige-tint);
+  color: var(--color-ink);
+  font-size: var(--fs-small);
+  line-height: 1.4;
+}
+.sub-chip--off { opacity: 0.55; text-decoration: line-through; }
+.sub-chip--add {
+  border: 1px dashed var(--color-gray);
+  background: transparent;
+  color: var(--color-ink-faint);
+  cursor: pointer;
+}
+.sub-chip--add:hover { color: var(--color-ink); border-color: var(--color-ink); }
